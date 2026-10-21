@@ -14,6 +14,9 @@ extends Node
 @export_range(-40.0, 0.0) var music_db := -15.0
 ## Crickets start as the sun goes down (nature levels).
 @export var crickets := false
+## Heard from inside behind a window: the rain, wind and thunder come muffled through the
+## glass, and drops tap on the pane close by.
+@export var indoors := false
 
 var _drip_players: Array[AudioStreamPlayer2D] = []
 var _drip_next := 0
@@ -32,21 +35,23 @@ var _music_built: AudioStreamWAV
 func _ready() -> void:
 	add_to_group("effects")
 	add_to_group("lightning_listeners")
+	var outside := _indoor_bus() if indoors else "Master"
 	if rain:
-		_hiss = _loop(SoundBank.rain_hiss(), "Master")
-		_rumble = _loop(SoundBank.rain_rumble(), "Master")
+		_hiss = _loop(SoundBank.rain_hiss(), outside)
+		_rumble = _loop(SoundBank.rain_rumble(), outside)
 	if wind:
 		_wind_bus = AudioServer.get_bus_index("Wind")
 		if _wind_bus < 0:
 			AudioServer.add_bus()
 			_wind_bus = AudioServer.bus_count - 1
 			AudioServer.set_bus_name(_wind_bus, "Wind")
-			AudioServer.set_bus_send(_wind_bus, "Master")
+			AudioServer.set_bus_send(_wind_bus, outside)
 			_wind_filter = AudioEffectBandPassFilter.new()
 			_wind_filter.resonance = 0.6
 			AudioServer.add_bus_effect(_wind_bus, _wind_filter)
 		else:
 			_wind_filter = AudioServer.get_bus_effect(_wind_bus, 0) as AudioEffectBandPassFilter
+		AudioServer.set_bus_send(_wind_bus, outside)
 		_wind = _loop(SoundBank.wind_noise(), "Wind")
 	if crickets:
 		_crickets = _loop(SoundBank.crickets(), "Master")
@@ -56,6 +61,19 @@ func _ready() -> void:
 			_start_music()
 		else:
 			_music_task = WorkerThreadPool.add_task(_build_music)
+
+
+## A bus that sounds like hearing it through a closed window.
+func _indoor_bus() -> String:
+	if AudioServer.get_bus_index("Indoors") < 0:
+		AudioServer.add_bus()
+		var i := AudioServer.bus_count - 1
+		AudioServer.set_bus_name(i, "Indoors")
+		AudioServer.set_bus_send(i, "Master")
+		var lp := AudioEffectLowPassFilter.new()
+		lp.cutoff_hz = 950.0
+		AudioServer.add_bus_effect(i, lp)
+	return "Indoors"
 
 
 func _exit_tree() -> void:
@@ -113,8 +131,12 @@ func _process(delta: float) -> void:
 
 
 ## Water dripping off gutters, branches and girders somewhere near: single plinks,
-## left and right, more of them the harder it rains.
+## left and right, more of them the harder it rains. Indoors: drops tapping on the pane.
 func _drips(delta: float, storm: float) -> void:
+	if indoors:
+		if randf() < delta * (8.0 + 14.0 * storm):
+			_tap()
+		return
 	if not VFX.on("drips") or storm < 0.05 or randf() > delta * (1.5 + 6.0 * storm):
 		return
 	if _drip_players.is_empty():
@@ -134,6 +156,23 @@ func _drips(delta: float, storm: float) -> void:
 	p.play()
 
 
+func _tap() -> void:
+	if _drip_players.size() < 6:
+		var d := AudioStreamPlayer2D.new()
+		d.max_distance = 100000.0
+		d.attenuation = 0.0
+		add_child(d)
+		_drip_players.append(d)
+	var p: AudioStreamPlayer2D = _drip_players[_drip_next % _drip_players.size()]
+	_drip_next += 1
+	var view := GameCamera.view_rect
+	p.stream = SoundBank.glass_tap(randi() % 4)
+	p.pitch_scale = randf_range(0.8, 1.3)
+	p.volume_db = volume_db - randf_range(16.0, 30.0)
+	p.global_position = Vector2(view.position.x + randf() * view.size.x, view.get_center().y)
+	p.play()
+
+
 func _fade(p: AudioStreamPlayer, linear: float, k: float) -> void:
 	var target := linear_to_db(maxf(linear, 0.0001)) + volume_db
 	p.volume_db = lerpf(p.volume_db, target, k)
@@ -145,7 +184,7 @@ func on_lightning(screen_x: float, strength: float) -> void:
 		return
 	var delay := lerpf(2.4, 0.3, strength)
 	var pan := clampf(screen_x / GameCamera.view_rect.size.x * 2.0 - 1.0, -1.0, 1.0)
-	_one_shot(SoundBank.thunder(randi() % 3), delay, linear_to_db(0.5 + 0.6 * strength), pan)
+	_one_shot(SoundBank.thunder(randi() % 3), delay, linear_to_db(0.5 + 0.6 * strength) + (4.0 if indoors else 0.0), pan)
 	if strength > 0.75:
 		_one_shot(SoundBank.thunder_crack(), delay - 0.05, linear_to_db(0.5 * strength), pan)
 
@@ -157,6 +196,8 @@ func _one_shot(stream: AudioStream, delay: float, db: float, pan: float) -> void
 	p.volume_db = db + volume_db
 	p.max_distance = 100000.0
 	p.attenuation = 0.0
+	if indoors:
+		p.bus = "Indoors"
 	add_child(p)
 	var view := GameCamera.view_rect
 	p.global_position = Vector2(view.get_center().x + pan * view.size.x * 0.5, view.get_center().y)

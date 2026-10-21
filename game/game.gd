@@ -14,9 +14,10 @@ static var instance: Game
 static var _pending := ""
 
 const VIEW := Vector2i(1366, 768)
+const TITLE := "res://title/title_screen.tscn"
 const OCCLUDER_BIT := 2
 
-@export_file("*.tscn") var first_level := "res://levels/level_01/level_01.tscn"
+@export_file("*.tscn") var first_level := TITLE
 
 ## The viewport the level lives in.
 var world: SubViewport

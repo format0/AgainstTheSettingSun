@@ -105,6 +105,11 @@ static func splash() -> AudioStreamWAV:
 	return _cached("splash", func(): return _make_splash())
 
 
+## A raindrop striking a window pane (four variants).
+static func glass_tap(variant: int) -> AudioStreamWAV:
+	return _cached("tap%d" % variant, func(): return _make_glass_tap(variant))
+
+
 ## A single drop of water falling from an edge into a puddle (four variants).
 static func drip(variant: int) -> AudioStreamWAV:
 	return _cached("drip%d" % variant, func(): return _make_drip(variant))
@@ -545,6 +550,18 @@ static func _make_splash() -> AudioStreamWAV:
 			if at + k < a.size():
 				var tt := float(k) / RATE
 				a[at + k] += sin(TAU * f * tt * (1.0 + tt * 6.0)) * exp(-tt * 40.0) * 0.18
+	return _to_stream(a, false)
+
+
+static func _make_glass_tap(variant: int) -> AudioStreamWAV:
+	var a := _new(0.06)
+	# a hard little tick with the faint ring of the pane behind it
+	var f := 2400.0 + variant * 700.0
+	var lp := 0.0
+	for i in a.size():
+		var t := float(i) / RATE
+		lp += (randf_range(-1.0, 1.0) - lp) * 0.6
+		a[i] = lp * exp(-t * 900.0) * 0.6 + sin(TAU * f * t) * exp(-t * 120.0) * 0.12
 	return _to_stream(a, false)
 
 

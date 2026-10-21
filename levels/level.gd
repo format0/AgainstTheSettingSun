@@ -66,6 +66,7 @@ func _ready() -> void:
 		return
 	overlay = Game.instance.overlay
 	Game.mark_occluders(self)
+	Progress.reach(scene_file_path)
 	for k: Bursts.Kind in [Bursts.Kind.DUST, Bursts.Kind.EMBERS, Bursts.Kind.LEAVES]:
 		add_child(Bursts.create(k))
 	var r := _respawn_data()
@@ -97,9 +98,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("restart"):
 		_clear_respawn()
 		Game.instance.reload_level()
-	elif state == State.ESCAPED and next_level == "" and event.is_action_pressed("action"):
+	elif event.is_action_pressed("ui_cancel") or (state == State.ESCAPED and next_level == "" and event.is_action_pressed("action")):
+		# back to the window and the rain
 		_clear_respawn()
-		Game.instance.load_level.call_deferred("res://levels/level_01/level_01.tscn")
+		Game.instance.load_level.call_deferred(Game.TITLE)
 
 
 # ------------------------------------------------------------------ memory

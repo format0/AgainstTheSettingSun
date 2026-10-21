@@ -4,4 +4,4 @@
 
 [node name="Game" type="Node"]
 script = ExtResource("1")
-first_level = "res://levels/level_01/level_01.tscn"
+first_level = "res://title/title_screen.tscn"
