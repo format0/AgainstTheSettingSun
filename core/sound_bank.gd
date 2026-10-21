@@ -105,6 +105,11 @@ static func splash() -> AudioStreamWAV:
 	return _cached("splash", func(): return _make_splash())
 
 
+## A single drop of water falling from an edge into a puddle (four variants).
+static func drip(variant: int) -> AudioStreamWAV:
+	return _cached("drip%d" % variant, func(): return _make_drip(variant))
+
+
 static func sizzle() -> AudioStreamWAV:
 	return _cached("sizzle", func(): return _make_sizzle(1.3))
 
@@ -540,6 +545,20 @@ static func _make_splash() -> AudioStreamWAV:
 			if at + k < a.size():
 				var tt := float(k) / RATE
 				a[at + k] += sin(TAU * f * tt * (1.0 + tt * 6.0)) * exp(-tt * 40.0) * 0.18
+	return _to_stream(a, false)
+
+
+static func _make_drip(variant: int) -> AudioStreamWAV:
+	var a := _new(0.16)
+	# the "plink": a tone that bends upward as the bubble closes, and a tiny tick of impact
+	var f := 900.0 + variant * 330.0
+	var ph := 0.0
+	for i in a.size():
+		var t := float(i) / RATE
+		ph += TAU * f * (1.0 + t * 9.0) / RATE
+		a[i] = sin(ph) * exp(-t * 38.0) * 0.5
+		if i < 90:
+			a[i] += randf_range(-1.0, 1.0) * (1.0 - i / 90.0) * 0.25
 	return _to_stream(a, false)
 
 

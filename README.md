@@ -153,7 +153,8 @@ the edges of roofs and girders.
 
 ### effects/
 `WeatherController`, `SkyEffect`, `LightningEffect`, `DistantScenery` (fields, works or quarry
-on the horizon, in two hazy layers with smoking chimneys), `RainLayer` (gust sheets; near rain
+on the horizon, in two layers seen through the haze of the sky behind them, with smoking
+chimneys, turbines blinking red and geese), `RainLayer` (gust sheets; near rain
 stops under roofs), `RainSplashes` (splashes and drips), `FogLayer`, `LeafStorm`, `WetGround`,
 `LightShafts` and `CameraLens` (inside the game they only set how strong the shafts and lens
 drops are), `Ambience`. Bursts of dust, embers and leaves are made by the

@@ -4,7 +4,8 @@ extends Node2D
 ## whole layer at once (a CanvasGroup), so overlapping shapes never darken each other and the
 ## sky glows through evenly. What stands on the horizon depends on the setting: a village with a church and old windmills in the fields,
 ## chimneys, a gas holder and cranes at the works, mesas and a bucket ropeway at the quarry.
-## Windows light up one by one as night comes. Now and then a flock of geese passes.
+## Wind turbines blink red on the ridges. Windows light up one by one as night comes. Now and
+## then a flock of geese passes.
 
 @export var scroll_scale := 0.22
 ## The colour of the far haze (multiplied by the remaining daylight).
@@ -12,6 +13,7 @@ extends Node2D
 @export var setting := DistantScenery.Setting.INDUSTRY
 
 var _mill_angle := 0.0
+var _turbine_angle := 0.0
 var _smoke: Array[Dictionary] = []
 var _puff: Texture2D
 var _geese_x := -1.0
@@ -41,6 +43,7 @@ func _stacks() -> Array[Vector2]:
 
 func _process(delta: float) -> void:
 	_mill_angle += (0.25 + Weather.wind * 0.9) * delta
+	_turbine_angle += (0.5 + Weather.wind) * 0.9 * delta
 	var industry := setting == DistantScenery.Setting.INDUSTRY
 	var amount := VFX.v("smoke")
 	for s in _stacks():
@@ -90,10 +93,12 @@ func _draw() -> void:
 	draw_colored_polygon(hill, col)
 	match setting:
 		DistantScenery.Setting.FIELDS:
+			_draw_turbines(cam, w, col, [140.0, 520.0, 700.0, 1420.0, 1640.0, 2120.0, 2480.0])
 			_draw_fields(cam, w, col)
 		DistantScenery.Setting.INDUSTRY:
 			_draw_industry(cam, w, col)
 		DistantScenery.Setting.QUARRY:
+			_draw_turbines(cam, w, col, [460.0, 1900.0, 2260.0])
 			_draw_quarry(cam, w, col)
 	for p in _smoke:
 		var pr: float = p.r
@@ -167,6 +172,28 @@ func _draw_fields(cam: float, w: float, col: Color) -> void:
 			var tip := hub + Vector2.from_angle(a) * 30.0
 			draw_line(hub, tip, col, 1.4)
 			draw_colored_polygon(PackedVector2Array([hub.lerp(tip, 0.3), tip, tip + Vector2.from_angle(a + PI * 0.5) * 6.0, hub.lerp(tip, 0.3) + Vector2.from_angle(a + PI * 0.5) * 5.0]), col)
+
+
+## Wind turbines along the far ridges: thin towers, three slow blades, and a red light on
+## each nacelle blinking in step with the others (it shines through the haze).
+func _draw_turbines(cam: float, w: float, col: Color, xs: Array) -> void:
+	var blink := sin(Weather.time * 3.4) > 0.55
+	for tx: float in xs:
+		if tx < cam - 80.0 or tx > cam + w + 80.0:
+			continue
+		var gy := _hill_y(tx) + 2.0
+		var h := 95.0 + fmod(tx * 0.37, 35.0)
+		var hub := Vector2(tx, gy - h)
+		draw_colored_polygon(PackedVector2Array([Vector2(tx - 2.2, gy), Vector2(tx + 2.2, gy), Vector2(tx + 1.2, gy - h), Vector2(tx - 1.2, gy - h)]), col)
+		draw_rect(Rect2(hub + Vector2(-2.5, -2.5), Vector2(8, 4.5)), col)
+		var a0 := _turbine_angle * (0.8 + fmod(tx, 7.0) * 0.06) + tx
+		for k in 3:
+			var a := a0 + k * TAU / 3.0
+			var d := Vector2.from_angle(a)
+			var L := h * 0.42
+			draw_colored_polygon(PackedVector2Array([hub + d.orthogonal() * 1.6, hub + d * L * 0.25 + d.orthogonal() * 2.2, hub + d * L, hub - d.orthogonal() * 0.8]), col)
+		if blink and Daylight.progress > 0.15:
+			draw_circle(hub + Vector2(1.5, -3.5), 1.8, Color(1.0, 0.2, 0.15, 0.95))
 
 
 func _draw_industry(cam: float, w: float, col: Color) -> void:

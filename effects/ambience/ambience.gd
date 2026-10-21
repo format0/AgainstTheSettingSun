@@ -1,7 +1,7 @@
 @icon("res://effects/effect_icon.svg")
 class_name Ambience
 extends Node
-## Background sound: rain hiss and rumble that follow the storm, gusting wind,
+## Background sound: rain hiss and rumble that follow the storm, drips nearby, gusting wind,
 ## thunder after lightning (closer strikes are louder, crack, and arrive sooner), a quiet
 ## pad of music, crickets as the light goes, and a heartbeat when something hunts you
 ## or the darkness is close.
@@ -15,6 +15,8 @@ extends Node
 ## Crickets start as the sun goes down (nature levels).
 @export var crickets := false
 
+var _drip_players: Array[AudioStreamPlayer2D] = []
+var _drip_next := 0
 var _hiss: AudioStreamPlayer
 var _rumble: AudioStreamPlayer
 var _wind: AudioStreamPlayer
@@ -103,10 +105,33 @@ func _process(delta: float) -> void:
 			break
 	_fade(_heart, maxf(0.45 if hunted else 0.0, Daylight.urgency() * 0.6), 1.0 - exp(-delta * 3.0))
 	_heart.pitch_scale = lerpf(_heart.pitch_scale, 1.35 if hunted else 1.0 + Daylight.urgency() * 0.3, delta)
+	_drips(delta, s)
 	if _wind:
 		_fade(_wind, 0.35 * Weather.wind * Weather.gust * (0.5 + 0.5 * s), 1.0 - exp(-delta * 4.0))
 		if _wind_filter:
 			_wind_filter.cutoff_hz = 280.0 + Weather.wind * Weather.gust * 700.0
+
+
+## Water dripping off gutters, branches and girders somewhere near: single plinks,
+## left and right, more of them the harder it rains.
+func _drips(delta: float, storm: float) -> void:
+	if not VFX.on("drips") or storm < 0.05 or randf() > delta * (1.5 + 6.0 * storm):
+		return
+	if _drip_players.is_empty():
+		for i in 4:
+			var d := AudioStreamPlayer2D.new()
+			d.max_distance = 100000.0
+			d.attenuation = 0.0
+			add_child(d)
+			_drip_players.append(d)
+	var p: AudioStreamPlayer2D = _drip_players[_drip_next]
+	_drip_next = (_drip_next + 1) % _drip_players.size()
+	var view := GameCamera.view_rect
+	p.stream = SoundBank.drip(randi() % 4)
+	p.pitch_scale = randf_range(0.85, 1.25)
+	p.volume_db = volume_db - randf_range(14.0, 24.0)
+	p.global_position = Vector2(view.position.x + randf() * view.size.x, view.get_center().y)
+	p.play()
 
 
 func _fade(p: AudioStreamPlayer, linear: float, k: float) -> void:

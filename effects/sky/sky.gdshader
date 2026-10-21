@@ -1,26 +1,17 @@
 shader_type canvas_item;
+#include "res://effects/sky/sky_base.gdshaderinc"
 // Stormy sunset sky drawn live: colour gradient, sun with glow, two layers of
 // domain-warped clouds drifting in the wind, and clouds lit from inside by lightning.
 // `dusk` (0..1) lets the sun sink and the colours drain away into night, with a few stars.
 
-uniform vec2 view_size = vec2(1366.0, 768.0);
 uniform float weather_time = 0.0;
 uniform float cam_x = 0.0;
-uniform vec2 sun_pos = vec2(560.0, 622.0);
 uniform float flash = 0.0;
 uniform float bolt_x = 0.0;
-uniform float storm = 1.0;
 uniform float cloud_cover = 0.40;
-uniform float dusk = 0.0;
-uniform float sun_glow = 1.0;
 uniform float afterglow = 1.0;
-uniform float sun_squash = 1.0;
 uniform float far_flash = 0.0;   // silent lightning far away, inside the clouds on the horizon
 uniform float far_x = 600.0;
-uniform vec3 zenith : source_color = vec3(0.045, 0.022, 0.035);
-uniform vec3 high_sky : source_color = vec3(0.26, 0.06, 0.05);
-uniform vec3 low_sky : source_color = vec3(0.78, 0.25, 0.07);
-uniform vec3 horizon : source_color = vec3(0.92, 0.42, 0.13);
 
 float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); vec2 u = f*f*(3.-2.*f);
@@ -34,19 +25,12 @@ void fragment() {
 	// the palette drains from orange to wine red to a deep blue-violet night
 	float d1 = smoothstep(0.3, 0.78, dusk);
 	float d2 = smoothstep(0.66, 1.0, dusk);
-	vec3 zen = mix(mix(zenith, vec3(0.03, 0.02, 0.045), d1), vec3(0.006, 0.007, 0.016), d2);
-	vec3 hi = mix(mix(high_sky, vec3(0.16, 0.04, 0.07), d1), vec3(0.02, 0.018, 0.04), d2);
-	vec3 lo = mix(mix(low_sky, vec3(0.55, 0.12, 0.08), d1), vec3(0.06, 0.03, 0.06), d2);
-	vec3 hor = mix(mix(horizon, vec3(0.80, 0.26, 0.10), d1), vec3(0.16, 0.05, 0.06), d2);
-	vec3 c = mix(zen, hi, smoothstep(0., .45, h));
-	c = mix(c, lo, smoothstep(.36, .72, h));
-	c = mix(c, hor, smoothstep(.70, .83, h));
+	vec3 c = sky_gradient(L);
 	// near the horizon the sun is squashed flat and reddened by the thick air
-	float low = smoothstep(.62, .84, sun_pos.y / view_size.y) * sun_squash;
-	float d = length((L - sun_pos) * vec2(1., 1.2 + .55 * low));
+	float low = sky_sun_low();
+	float d = sky_sun_dist(L);
 	// after it has gone down the clouds still catch its light from below
 	float ag = smoothstep(.22, .45, dusk) * (1. - smoothstep(.78, .97, dusk)) * afterglow;
-	c += vec3(1., .50, .16) * (exp(-d / 240.) * .30 + exp(-d / 60.) * .5) * smoothstep(.15, .8, h + .1) * sun_glow;
 
 	vec2 sp = vec2(L.x + cam_x * .06, L.y);
 	float t = weather_time;
