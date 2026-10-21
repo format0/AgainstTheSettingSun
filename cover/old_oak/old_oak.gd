@@ -24,6 +24,8 @@ extends Cover
 var _branches: Array[Dictionary] = []
 var _trunk := PackedVector2Array()
 var _roots: Array[PackedVector2Array] = []
+## Broken-off stubs and burls on the trunk: [from, to, thickness].
+var _stubs: Array[Vector3] = []
 var _leaves_fx: GPUParticles2D
 
 
@@ -62,6 +64,15 @@ func _grow() -> void:
 		var a := Vector2(side * (w + 4.0 * s), -6.0 * s)
 		var tip := Vector2(side * (w + rng.randf_range(18, 36) * s), rng.randf_range(-1, 2))
 		_roots.append(PackedVector2Array([a + Vector2(0, -8 * s), tip, a + Vector2(0, 2)]))
+	_stubs.clear()
+	for k in rng.randi_range(1, 3):
+		var u := rng.randf_range(0.3, 0.8)
+		var side := -1.0 if rng.randf() < 0.5 else 1.0
+		var at := Vector2(side * w * lerpf(1.0, 0.62, u * u) * 0.9, -trunk_h * u)
+		var reach := rng.randf_range(6, 15) * s
+		var a := -PI * 0.5 + side * rng.randf_range(0.7, 1.3)
+		_stubs.append(Vector3(at.x, at.y, 0.0))
+		_stubs.append(Vector3(at.x + cos(a) * reach, at.y + sin(a) * reach, rng.randf_range(3.5, 6.0) * s))
 	var top := Vector2(sin(2.0 + tree_seed) * 5.0 * s, -trunk_h + 6.0 * s)
 	var limbs := rng.randi_range(3, 4)
 	for i in limbs:
@@ -74,11 +85,20 @@ func _grow_branch(rng: RandomNumberGenerator, start: Vector2, angle: float, leng
 	var bend := rng.randf_range(-0.35, 0.35)
 	var mid := start + Vector2.from_angle(angle + bend) * length * 0.5
 	var end := mid + Vector2.from_angle(angle - bend * 0.6) * length * 0.5
-	var leaves: Array[Vector4] = []
+	# clumps of leaves on the outer twigs: lumpy masses with a rim of single leaves, thin
+	# twigs reaching into them, and a few loose sprigs around, so the sky shows through
+	var clumps: Array[Dictionary] = []
 	if level >= 3:
-		for k in (7 if level >= 4 else 3):
-			leaves.append(Vector4(rng.randf_range(-16, 16) * size, rng.randf_range(-14, 8) * size, rng.randf_range(6, 11) * size, rng.randf() * TAU))
-	_branches.append({"start": start, "mid": mid, "end": end, "thick": thick, "level": level, "phase": rng.randf() * TAU, "leaves": leaves})
+		for k in (5 if level >= 4 else 2):
+			var off := Vector2(rng.randf_range(-20, 20), rng.randf_range(-17, 7)) * size
+			var r := rng.randf_range(7.0, 13.0) * size
+			var sprigs := PackedVector3Array()
+			for j in rng.randi_range(2, 4):
+				var a := rng.randf_range(-PI, 0.2) if rng.randf() < 0.8 else rng.randf_range(0.2, PI)
+				sprigs.append(Vector3(cos(a) * r * rng.randf_range(1.05, 1.5), sin(a) * r * rng.randf_range(0.95, 1.35), a + rng.randf_range(-0.6, 0.6)))
+			clumps.append({"off": off, "poly": DrawKit.foliage(Vector2(r * 1.25, r * 0.92), rng.randi(), 3.4 * size),
+				"phase": rng.randf() * TAU, "sprigs": sprigs})
+	_branches.append({"start": start, "mid": mid, "end": end, "thick": thick, "level": level, "phase": rng.randf() * TAU, "clumps": clumps})
 	if level < 4 and length > 14.0:
 		var n := 2 if rng.randf() < 0.6 else 3
 		for i in n:
@@ -109,6 +129,9 @@ func _draw() -> void:
 	draw_colored_polygon(_trunk, c)
 	for r in _roots:
 		draw_colored_polygon(r, c)
+	for i in range(0, _stubs.size(), 2):
+		var th := _stubs[i + 1].z
+		DrawKit.limb(self, Vector2(_stubs[i].x, _stubs[i].y), Vector2(_stubs[i + 1].x, _stubs[i + 1].y), th * 1.4, th * 0.7)
 	for b in _branches:
 		var lvl: int = b.level
 		# the further out, the more it moves
@@ -122,14 +145,21 @@ func _draw() -> void:
 		DrawKit.limb(self, m, e, th * 0.8, th * 0.6)
 		if leafless:
 			continue
-		for l in b.leaves:
-			var leaf: Vector4 = l
-			var flutter := sin(t * (7.0 + wind * 6.0) + leaf.w * 3.0) * (0.4 + wind) * 0.8
-			var p := e + Vector2(leaf.x - wind * 2.5 * gust, leaf.y + flutter)
-			var r := leaf.z * (1.0 + 0.06 * sin(t * 3.0 + leaf.w))
-			draw_circle(p, r, c)
-			# a ragged rim of single leaves
-			for j in 3:
-				var a := leaf.w + j * 2.1 + flutter * 0.3
-				DrawKit.ellipse(self, p + Vector2.from_angle(a) * r, Vector2(2.6, 1.3) * size, a + flutter, c, 6)
+		var leaf_shape := DrawKit.leaf_points(4.2 * size, 2.0 * size)
+		for cl in b.clumps:
+			var ph: float = cl.phase
+			var flutter := sin(t * (5.0 + wind * 5.0) + ph * 3.0) * (0.4 + wind) * 0.8
+			var p: Vector2 = e + (cl.off as Vector2) + Vector2(-wind * 2.5 * gust, flutter)
+			# the twig that carries it
+			draw_line(e, p + Vector2(0, 2), c, maxf(1.0, th * 0.35))
+			draw_set_transform(p, flutter * 0.03, Vector2.ONE)
+			draw_colored_polygon(cl.poly, c)
+			for sp in cl.sprigs:
+				var sv: Vector3 = sp
+				var tip := Vector2(sv.x, sv.y)
+				draw_line(tip * 0.7, tip, c, 0.9)
+				draw_set_transform(p + tip, sv.z + flutter * 0.25, Vector2.ONE)
+				draw_colored_polygon(leaf_shape, c)
+				draw_set_transform(p, flutter * 0.03, Vector2.ONE)
+			draw_set_transform(Vector2.ZERO)
 	_draw_cover_outline()

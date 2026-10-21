@@ -144,6 +144,92 @@ static func blob(center: Vector2, radius: Vector2, seed_value: int, roughness :=
 	return pts
 
 
+## The outline of a weathered rock standing on the ground: flat facets meeting at hard
+## corners, a ledge or two where the strata overhang, and narrow cracks cut into the edge.
+## Runs from (-size.x/2, 0) over the top to (size.x/2, 0). Deterministic for a seed.
+static func rock_outline(size: Vector2, seed_value: int, cracks := 2, ledges := 1) -> PackedVector2Array:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var corners := PackedVector2Array()
+	var n := 8
+	# leaning to one side, with a broken, tilted top
+	var skew := rng.randf_range(-0.3, 0.3)
+	var tilt := rng.randf_range(-0.18, 0.18)
+	for i in n + 1:
+		var u := (float(i) + (rng.randf_range(-0.3, 0.3) if i > 0 and i < n else 0.0)) / n
+		var a := PI - u * PI
+		var c := cos(a)
+		var sn := pow(sin(a), 0.75)
+		var r := 1.0 + rng.randf_range(-0.16, 0.1)
+		var p := Vector2(signf(c) * pow(absf(c), 0.9) * size.x * 0.5, -sn * size.y * (1.0 + tilt * c)) * r
+		p.x -= p.y * skew
+		if i == 0 or i == n:
+			p = Vector2(signf(c) * size.x * 0.5, 0.0)
+		corners.append(p)
+	var crack_at := []
+	for k in cracks:
+		crack_at.append(rng.randi_range(2, n - 2))
+	var ledge_at := []
+	for k in ledges:
+		ledge_at.append(rng.randi_range(1, n - 2))
+	var pts := PackedVector2Array()
+	for i in n:
+		var a := corners[i]
+		var b := corners[i + 1]
+		pts.append(a)
+		if i in ledge_at:
+			# the stratum above juts out over the one below
+			var out := (b - a).normalized().orthogonal() * -1.0
+			pts.append(a.lerp(b, 0.45))
+			pts.append(a.lerp(b, 0.45) + out * rng.randf_range(3, 6) + Vector2(0, 2))
+			pts.append(a.lerp(b, 0.5) + out * rng.randf_range(3, 6) - Vector2(0, 1))
+		for k in range(1, 3):
+			var q := a.lerp(b, k / 3.0) + Vector2(rng.randf_range(-1.2, 1.2), rng.randf_range(-1.2, 1.2))
+			if k == 2 and i in crack_at:
+				var inward := Vector2(-q.x, -q.y - size.y * 0.3).normalized()
+				pts.append(q - (b - a).normalized() * 1.5)
+				pts.append(q + inward * rng.randf_range(6, 12))
+				pts.append(q + (b - a).normalized() * 1.5)
+			else:
+				pts.append(q)
+	pts.append(corners[n])
+	return pts
+
+
+## The outline of a clump of foliage: a lumpy mass whose rim breaks up into single pointed
+## leaves, so it reads as leaves against the sky rather than as a ball. `leaf` is how far the
+## leaf tips stick out. Deterministic for a seed.
+static func foliage(radius: Vector2, seed_value: int, leaf := 4.0) -> PackedVector2Array:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var pts := PackedVector2Array()
+	var p1 := rng.randf() * TAU
+	var p2 := rng.randf() * TAU
+	var tips := clampi(int((radius.x + radius.y) * PI / (leaf * 1.3)), 10, 70)
+	for i in tips:
+		var a0 := (i + rng.randf_range(-0.15, 0.15)) * TAU / tips
+		var a1 := (i + 0.5 + rng.randf_range(-0.2, 0.2)) * TAU / tips
+		for k in 2:
+			var a := a0 if k == 0 else a1
+			var lump := 1.0 + 0.16 * sin(a * 2.0 + p1) + 0.1 * sin(a * 5.0 + p2)
+			var r := Vector2(cos(a) * radius.x, sin(a) * radius.y) * lump * 0.86
+			if k == 0:
+				# a notch between two leaves
+				pts.append(r - r.normalized() * rng.randf_range(0.0, leaf * 0.5))
+			else:
+				# the leaf tip, sometimes a longer one on its own stalk
+				var out := r.normalized() * leaf * rng.randf_range(0.6, 1.0)
+				if rng.randf() < 0.12:
+					out *= 1.9
+				pts.append(r + out.rotated(rng.randf_range(-0.35, 0.35)))
+	return pts
+
+
+## One small pointed leaf (or needle tuft), centred on its stalk end, pointing along +x.
+static func leaf_points(length: float, width: float) -> PackedVector2Array:
+	return PackedVector2Array([Vector2.ZERO, Vector2(length * 0.35, -width * 0.5), Vector2(length, 0.0), Vector2(length * 0.35, width * 0.5)])
+
+
 ## A row of bolt heads sticking out of an edge, so the outline reads as riveted steel.
 static func bolts(ci: CanvasItem, a: Vector2, b: Vector2, spacing := 12.0, size := 1.6, col := INK) -> void:
 	var length := a.distance_to(b)

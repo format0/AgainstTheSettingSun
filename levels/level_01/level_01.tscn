@@ -1,4 +1,4 @@
-[gd_scene load_steps=55 format=3]
+[gd_scene load_steps=57 format=3]
 
 [ext_resource type="Script" path="res://levels/level.gd" id="1"]
 [ext_resource type="Script" path="res://effects/weather/weather_controller.gd" id="2"]
@@ -39,21 +39,23 @@
 [ext_resource type="Script" path="res://structures/crate_stack/crate_stack.gd" id="37"]
 [ext_resource type="Script" path="res://structures/solid_block/solid_block.gd" id="38"]
 [ext_resource type="Script" path="res://interactive/lever/lever.gd" id="39"]
-[ext_resource type="Script" path="res://interactive/sliding_gate/sliding_gate.gd" id="40"]
-[ext_resource type="Script" path="res://environment/lantern/lantern.gd" id="41"]
-[ext_resource type="Script" path="res://environment/street_lamp/street_lamp.gd" id="42"]
-[ext_resource type="Script" path="res://environment/windmill/windmill.gd" id="43"]
-[ext_resource type="Script" path="res://gameplay/level_exit/level_exit.gd" id="44"]
-[ext_resource type="Script" path="res://creatures/frog/frog.gd" id="45"]
-[ext_resource type="Script" path="res://creatures/crow/crow.gd" id="46"]
-[ext_resource type="Script" path="res://creatures/plastic_bag/plastic_bag.gd" id="47"]
-[ext_resource type="Script" path="res://creatures/bats/bats.gd" id="48"]
-[ext_resource type="Script" path="res://creatures/fireflies/fireflies.gd" id="49"]
-[ext_resource type="Script" path="res://creatures/cat/stray_cat.gd" id="50"]
-[ext_resource type="Script" path="res://creatures/fish/jumping_fish.gd" id="51"]
-[ext_resource type="PackedScene" path="res://player/player.tscn" id="52"]
-[ext_resource type="Script" path="res://core/game_camera.gd" id="53"]
-[ext_resource type="Script" path="res://environment/grass_field/grass_field.gd" id="54"]
+[ext_resource type="Script" path="res://structures/roof/roof.gd" id="40"]
+[ext_resource type="Script" path="res://interactive/sliding_gate/sliding_gate.gd" id="41"]
+[ext_resource type="Script" path="res://environment/lantern/lantern.gd" id="42"]
+[ext_resource type="Script" path="res://environment/street_lamp/street_lamp.gd" id="43"]
+[ext_resource type="Script" path="res://environment/windmill/windmill.gd" id="44"]
+[ext_resource type="Script" path="res://gameplay/level_exit/level_exit.gd" id="45"]
+[ext_resource type="Script" path="res://creatures/frog/frog.gd" id="46"]
+[ext_resource type="Script" path="res://creatures/crow/crow.gd" id="47"]
+[ext_resource type="Script" path="res://creatures/plastic_bag/plastic_bag.gd" id="48"]
+[ext_resource type="Script" path="res://creatures/starlings/starlings.gd" id="49"]
+[ext_resource type="Script" path="res://creatures/bats/bats.gd" id="50"]
+[ext_resource type="Script" path="res://creatures/fireflies/fireflies.gd" id="51"]
+[ext_resource type="Script" path="res://creatures/cat/stray_cat.gd" id="52"]
+[ext_resource type="Script" path="res://creatures/fish/jumping_fish.gd" id="53"]
+[ext_resource type="PackedScene" path="res://player/player.tscn" id="54"]
+[ext_resource type="Script" path="res://core/game_camera.gd" id="55"]
+[ext_resource type="Script" path="res://environment/grass_field/grass_field.gd" id="56"]
 
 [node name="Level01" type="Node2D"]
 script = ExtResource("1")
@@ -298,6 +300,7 @@ size = Vector2(250, 150)
 crumble = 0.45
 windows = 1
 wall_seed = 4
+gable = 55
 
 [node name="Oak2" type="Node2D" parent="World"]
 script = ExtResource("16")
@@ -453,6 +456,8 @@ size = Vector2(200, 175)
 crumble = 0.2
 windows = 2
 wall_seed = 8
+gable = 48
+ivy = 0.5
 
 [node name="Loft" type="StaticBody2D" parent="World"]
 script = ExtResource("37")
@@ -503,12 +508,14 @@ windows = 2
 wall_seed = 11
 
 [node name="BarnRoof" type="StaticBody2D" parent="World"]
-script = ExtResource("13")
-grass = false
-edge_detail = false
-bottom = 420
-surface = "wood"
-points = PackedVector2Array(6560, 404, 6756, 318, 6952, 404)
+script = ExtResource("40")
+position = Vector2(6560, 404)
+profile = PackedVector2Array(0, 0, 196, -86, 392, 0)
+thickness = 16
+cladding = 1
+damage = 0.45
+weathervane = true
+roof_seed = 3
 
 [node name="BarnWallL" type="StaticBody2D" parent="World"]
 script = ExtResource("38")
@@ -525,7 +532,7 @@ style = 2
 detail_seed = 6
 
 [node name="FarmGate" type="Node2D" parent="World"]
-script = ExtResource("40")
+script = ExtResource("41")
 position = Vector2(6596, 516)
 size = Vector2(24, 118)
 direction = 0
@@ -533,13 +540,13 @@ style = 2
 speed = 45
 
 [node name="BarnLantern" type="Node2D" parent="World"]
-script = ExtResource("41")
+script = ExtResource("42")
 position = Vector2(6800, 420)
 drop = 34
 light_radius = 70
 
 [node name="GateLamp" type="Node2D" parent="World"]
-script = ExtResource("42")
+script = ExtResource("43")
 position = Vector2(6545, 500)
 bulbs = PackedVector2Array(0, 0)
 post_height = 134
@@ -554,116 +561,122 @@ size = 0.95
 tree_seed = 12
 
 [node name="Windmill" type="Node2D" parent="World"]
-script = ExtResource("43")
+script = ExtResource("44")
 position = Vector2(7240, 598)
 z_index = -30
 
 [node name="Exit" type="Area2D" parent="World"]
-script = ExtResource("44")
+script = ExtResource("45")
 position = Vector2(7280, 300)
 size = Vector2(120, 320)
 
 [node name="Creatures" type="Node2D" parent="."]
 
 [node name="Frog" type="Node2D" parent="Creatures"]
-script = ExtResource("45")
+script = ExtResource("46")
 position = Vector2(260, 633)
 
 [node name="Frog2" type="Node2D" parent="Creatures"]
-script = ExtResource("45")
+script = ExtResource("46")
 position = Vector2(720, 633)
 
 [node name="Frog3" type="Node2D" parent="Creatures"]
-script = ExtResource("45")
+script = ExtResource("46")
 position = Vector2(1380, 633)
 
 [node name="Frog4" type="Node2D" parent="Creatures"]
-script = ExtResource("45")
+script = ExtResource("46")
 position = Vector2(2250, 633)
 
 [node name="Frog5" type="Node2D" parent="Creatures"]
-script = ExtResource("45")
+script = ExtResource("46")
 position = Vector2(4060, 633)
 
 [node name="Frog6" type="Node2D" parent="Creatures"]
-script = ExtResource("45")
+script = ExtResource("46")
 position = Vector2(5320, 633)
 
 [node name="Frog7" type="Node2D" parent="Creatures"]
-script = ExtResource("45")
+script = ExtResource("46")
 position = Vector2(5800, 633)
 
 [node name="Crow" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
-script = ExtResource("46")
+script = ExtResource("47")
 position = Vector2(200, 440)
 power_line = NodePath("../../World/PowerLine")
 
 [node name="Crow2" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
-script = ExtResource("46")
+script = ExtResource("47")
 position = Vector2(380, 440)
 power_line = NodePath("../../World/PowerLine")
 
 [node name="Crow3" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
-script = ExtResource("46")
+script = ExtResource("47")
 position = Vector2(520, 440)
 power_line = NodePath("../../World/PowerLine")
 
 [node name="Crow4" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
-script = ExtResource("46")
+script = ExtResource("47")
 position = Vector2(700, 440)
 power_line = NodePath("../../World/PowerLine")
 
 [node name="Crow5" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
-script = ExtResource("46")
+script = ExtResource("47")
 position = Vector2(860, 440)
 power_line = NodePath("../../World/PowerLine")
 
 [node name="Bag" type="Node2D" parent="Creatures"]
-script = ExtResource("47")
+script = ExtResource("48")
 position = Vector2(2600, 631)
 
+[node name="Starlings" type="Node2D" parent="Creatures"]
+script = ExtResource("49")
+starts_at = 0.12
+ends_at = 0.5
+height = 0.3
+
 [node name="Bats" type="Node2D" parent="Creatures"]
-script = ExtResource("48")
+script = ExtResource("50")
 starts_at = 0.35
 
 [node name="Fireflies1" type="Node2D" parent="Creatures"]
-script = ExtResource("49")
+script = ExtResource("51")
 position = Vector2(150, 520)
 size = Vector2(460, 100)
 count = 22
 
 [node name="Fireflies2" type="Node2D" parent="Creatures"]
-script = ExtResource("49")
+script = ExtResource("51")
 position = Vector2(1360, 540)
 size = Vector2(320, 90)
 count = 16
 
 [node name="Fireflies3" type="Node2D" parent="Creatures"]
-script = ExtResource("49")
+script = ExtResource("51")
 position = Vector2(5650, 530)
 size = Vector2(560, 100)
 count = 26
 
 [node name="Cat" type="Node2D" parent="Creatures"]
-script = ExtResource("50")
+script = ExtResource("52")
 position = Vector2(3160, 633)
 wander_left = 70
 wander_right = 90
 
 [node name="Fish1" type="Node2D" parent="Creatures"]
-script = ExtResource("51")
+script = ExtResource("53")
 position = Vector2(1090, 664)
 width = 220
 
 [node name="Fish2" type="Node2D" parent="Creatures"]
-script = ExtResource("51")
+script = ExtResource("53")
 position = Vector2(4870, 664)
 width = 370
 
-[node name="Player" parent="." instance=ExtResource("52")]
+[node name="Player" parent="." instance=ExtResource("54")]
 
 [node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
-script = ExtResource("53")
+script = ExtResource("55")
 target = NodePath("../Player")
 
 [node name="Foreground" type="Parallax2D" parent="."]
@@ -671,7 +684,7 @@ scroll_scale = Vector2(1.25, 1)
 z_index = 30
 
 [node name="Reeds" type="Node2D" parent="Foreground"]
-script = ExtResource("54")
+script = ExtResource("56")
 position = Vector2(0, 635)
 width = 9620
 spacing_min = 2.5

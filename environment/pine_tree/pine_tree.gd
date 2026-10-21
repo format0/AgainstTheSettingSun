@@ -20,7 +20,10 @@ extends Node2D
 		ragged = v
 		_grow()
 
-var _tiers: Array[Vector4] = []
+## Boughs: {u, side, poly (in the bough's own frame, pointing right), phase}.
+var _boughs: Array[Dictionary] = []
+## Dead twigs low on the trunk: [u, side, length].
+var _twigs: Array[Vector3] = []
 
 
 func _ready() -> void:
@@ -28,20 +31,46 @@ func _ready() -> void:
 
 
 func _grow() -> void:
-	_tiers.clear()
+	_boughs.clear()
+	_twigs.clear()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = tree_seed
-	var n := int(height / 22.0)
+	# whorls of boughs all the way up, overlapping into a ragged cone with gaps where storms
+	# took them; each bough droops, then turns up at the tip, and hangs a fringe of needles
+	var n := int(height / 13.0)
 	for i in n:
-		var u := 0.22 + 0.78 * float(i) / n
-		if rng.randf() < ragged * 0.5 and u < 0.85:
-			continue
-		var reach := height * 0.3 * (1.0 - u) * rng.randf_range(0.7, 1.15) + 8.0
+		var u := 0.2 + 0.8 * float(i) / n + rng.randf_range(-0.01, 0.01)
 		for side: float in [-1.0, 1.0]:
-			if rng.randf() < ragged * 0.35:
+			if rng.randf() < ragged * 0.45 and u < 0.85:
 				continue
-			_tiers.append(Vector4(u, side * reach, rng.randf_range(5, 9), rng.randf() * TAU))
+			var reach := height * 0.3 * pow(1.0 - u, 0.9) * rng.randf_range(0.6, 1.15) + 7.0
+			_boughs.append({"u": u, "side": side, "poly": _bough(rng, reach, rng.randf_range(6.0, 10.0) * (1.0 - u * 0.55)),
+				"phase": rng.randf() * TAU})
+	for i in rng.randi_range(2, 4):
+		_twigs.append(Vector3(rng.randf_range(0.06, 0.22), -1.0 if rng.randf() < 0.5 else 1.0, rng.randf_range(10, 24)))
 	queue_redraw()
+
+
+func _bough(rng: RandomNumberGenerator, length: float, thick: float) -> PackedVector2Array:
+	var droop := length * rng.randf_range(0.28, 0.45)
+	var top := PackedVector2Array()
+	var bottom := PackedVector2Array()
+	var steps := maxi(6, int(length / 2.6))
+	for k in steps + 1:
+		var u := float(k) / steps
+		var x := length * u
+		# down along the bough, then a little up again at the tip
+		var y := droop * (u * u * 1.4 - u * u * u * 0.8) - (u * 7.0 * u * u if u > 0.7 else 0.0) * thick * 0.2
+		var w := thick * (1.0 - u * 0.6)
+		top.append(Vector2(x, y - w * 0.5 - (rng.randf_range(0.5, 2.0) if k % 3 == 0 else 0.0)))
+		# needle tufts: deep points and shallow notches, now and then a hanging side spray
+		var hang := w * (rng.randf_range(1.0, 1.9) if k % 2 == 0 else rng.randf_range(0.35, 0.7))
+		if rng.randf() < 0.18 and u > 0.2 and u < 0.85:
+			hang *= 1.9
+		bottom.append(Vector2(x + rng.randf_range(-0.8, 0.8), y + hang))
+	top.append(Vector2(length + thick * 0.6, top[top.size() - 1].y - thick * 0.3))
+	bottom.reverse()
+	return top + bottom
 
 
 func _process(_delta: float) -> void:
@@ -64,25 +93,22 @@ func _draw() -> void:
 	for i in 8:
 		var u0 := i / 8.0
 		DrawKit.limb(self, pts[i], pts[i + 1], lerpf(7.0, 1.5, u0), lerpf(7.0, 1.5, u0 + 0.125))
-	for t in _tiers:
-		var base := Vector2(0, -height * t.x) + _bend(t.x)
-		var flutter := sin(Weather.time * 4.0 + t.w) * Weather.wind * 2.0
-		var reach: float = t.y
-		var tip := base + Vector2(reach - Weather.wind * 6.0 * t.x * signf(reach + 0.001), absf(reach) * 0.28 + flutter)
-		var mid := base.lerp(tip, 0.5) + Vector2(0, -absf(reach) * 0.08)
-		var thick: float = t.z
-		# a drooping bough: smooth on top, a fringe of hanging needles underneath
-		var top_edge := PackedVector2Array()
-		var bottom_edge := PackedVector2Array()
-		var n := maxi(4, int(absf(reach) / 5.0))
-		for k in n + 1:
-			var u := float(k) / n
-			var q := base.lerp(mid, u * 2.0) if u < 0.5 else mid.lerp(tip, u * 2.0 - 1.0)
-			var w := thick * (1.0 - u * 0.75)
-			top_edge.append(q + Vector2(0, -w * 0.45))
-			var hang := w * (0.9 + 0.6 * float(k % 2)) + sin(Weather.time * 6.0 + t.w + k) * 0.6 * Weather.wind
-			bottom_edge.append(q + Vector2(0, hang))
-		bottom_edge.reverse()
-		draw_colored_polygon(top_edge + bottom_edge, c)
-	# the crown tip
-	draw_colored_polygon(PackedVector2Array([pts[8] + Vector2(0, -8), pts[8] + Vector2(5, 14), pts[8] + Vector2(-5, 14)]), c)
+	for tw in _twigs:
+		var base := Vector2(0, -height * tw.x) + _bend(tw.x)
+		var tip := base + Vector2(tw.y * tw.z, tw.z * 0.35)
+		draw_line(base, tip, c, 1.4)
+		draw_line(base.lerp(tip, 0.55), base.lerp(tip, 0.55) + Vector2(tw.y * 5.0, 4.0), c, 1.0)
+	var wind := Weather.wind
+	for b in _boughs:
+		var u: float = b.u
+		var side: float = b.side
+		var base := Vector2(0, -height * u) + _bend(u)
+		# leeward boughs droop, windward ones lift; the tips flutter
+		var lift := -wind * 0.12 * side * (0.5 + Weather.gust_at(global_position.x))
+		var flutter := sin(Weather.time * 4.0 + b.phase) * wind * 0.05
+		draw_set_transform(base, (lift + flutter) * side, Vector2(side, 1.0))
+		draw_colored_polygon(b.poly, c)
+	draw_set_transform(Vector2.ZERO)
+	# the leader at the top, with a last tuft
+	var tip := pts[8]
+	draw_colored_polygon(PackedVector2Array([tip + Vector2(0, -10), tip + Vector2(4, 4), tip + Vector2(6, 12), tip + Vector2(-6, 12), tip + Vector2(-4, 4)]), c)

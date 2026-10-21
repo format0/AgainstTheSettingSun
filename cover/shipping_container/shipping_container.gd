@@ -29,6 +29,9 @@ enum DoorEnd { NONE, LEFT, RIGHT }
 		_rebuild()
 
 var _body: PackedVector2Array
+## 0 = a ladder leaning on it, 1 = a torn tarp on the roof, 2 = cables hanging off it.
+var _extra := 0
+var _weeds := PackedVector2Array()
 var _static: StaticBody2D
 
 
@@ -59,10 +62,18 @@ func _rebuild() -> void:
 	# right end, corner casting, corrugated roof back to the left
 	_body.append(Vector2(size.x, -size.y))
 	var ribs := int(size.x / 9.0)
+	# the roof, sagging where something heavy once landed on it
+	var dent := rng.randf_range(0.25, 0.75)
 	for i in range(ribs, -1, -1):
-		var rx := size.x * i / ribs
-		_body.append(Vector2(rx, -size.y - (1.6 if i % 2 == 0 else 0.0)))
+		var u := float(i) / ribs
+		var rx := size.x * u
+		var sag := exp(-pow((u - dent) * 7.0, 2.0)) * 4.0
+		_body.append(Vector2(rx, -size.y + sag - (1.6 if i % 2 == 0 else 0.0)))
 	_body.append(Vector2(0, -size.y))
+	_extra = rust_seed % 3
+	_weeds.clear()
+	for i in int(size.x / 25.0):
+		_weeds.append(Vector2(rng.randf_range(-6, size.x + 6), rng.randf_range(5, 14)))
 	if solid and is_inside_tree():
 		if _static == null:
 			_static = StaticBody2D.new()
@@ -81,7 +92,7 @@ func _rebuild() -> void:
 
 
 func _process(_delta: float) -> void:
-	if door_ajar and not Engine.is_editor_hint():
+	if not Engine.is_editor_hint():
 		queue_redraw()
 
 
@@ -98,6 +109,37 @@ func _draw() -> void:
 	for cx: float in [-1.5, size.x - 6.5]:
 		draw_rect(Rect2(cx, -size.y - 3.0, 8.0, 7.0), c)
 		draw_rect(Rect2(cx, -8.0, 8.0, 8.0), c)
+	var gust := Weather.gust_at(global_position.x)
+	var bend := -Weather.wind * (0.5 + gust)
+	for w in _weeds:
+		for k in 3:
+			draw_line(Vector2(w.x + k * 2.0 - 2.0, 1.0), Vector2(w.x + k * 2.0 - 2.0 + bend * 3.0, -w.y + k * 3.0), c, 1.0)
+	match _extra:
+		0:
+			# a ladder leaning against the end without doors
+			var lx := 0.0 if door_end == DoorEnd.RIGHT else size.x
+			var s0 := -1.0 if door_end == DoorEnd.RIGHT else 1.0
+			var foot := Vector2(lx + s0 * 26.0, 0)
+			var head := Vector2(lx + s0 * 2.0, -size.y - 10.0)
+			var side := (head - foot).normalized().orthogonal() * 4.0
+			draw_line(foot - side, head - side, c, 1.8)
+			draw_line(foot + side, head + side, c, 1.8)
+			for k in 9:
+				var q := foot.lerp(head, (k + 0.6) / 9.6)
+				draw_line(q - side, q + side, c, 1.4)
+		1:
+			# a torn tarp weighed down on the roof, its loose end lifting in the wind
+			var a := Vector2(size.x * 0.3, -size.y - 1.0)
+			var b := Vector2(size.x * 0.62, -size.y - 1.0)
+			var lift := 4.0 + 6.0 * absf(sin(Weather.time * (3.0 + Weather.wind * 5.0))) * Weather.wind * (0.5 + gust)
+			draw_colored_polygon(PackedVector2Array([a, a + Vector2(10, -4), b + Vector2(-6, -3), b + Vector2(8, -lift), b + Vector2(14, -lift * 0.6), b + Vector2(4, 0)]), c)
+			draw_line(a + Vector2(14, -3), a + Vector2(12, 16), c, 1.0)
+		2:
+			# cables hanging from the roof edge, swinging
+			for k in 3:
+				var top := Vector2(size.x * (0.2 + k * 0.27), -size.y)
+				var sw := sin(Weather.time * 1.4 + k) * 3.0 * Weather.wind + bend * 4.0
+				draw_polyline(PackedVector2Array([top, top + Vector2(-2.0 + sw * 0.4, 0.0) + Vector2(-3, 3), top + Vector2(sw * 0.6 - 4.0, 10.0 + k * 6.0), top + Vector2(sw - 2.0, 18.0 + k * 9.0)]), c, 1.2)
 	if door_end != DoorEnd.NONE:
 		var ex := size.x if door_end == DoorEnd.RIGHT else 0.0
 		var s := 1.0 if door_end == DoorEnd.RIGHT else -1.0

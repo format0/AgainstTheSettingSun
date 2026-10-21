@@ -1,0 +1,300 @@
+[gd_scene load_steps=36 format=3]
+
+[ext_resource type="Script" path="res://levels/level.gd" id="1"]
+[ext_resource type="Script" path="res://effects/weather/weather_controller.gd" id="2"]
+[ext_resource type="Script" path="res://effects/sky/sky.gd" id="3"]
+[ext_resource type="Script" path="res://effects/distant_scenery/distant_scenery.gd" id="4"]
+[ext_resource type="Script" path="res://effects/rain/rain_layer.gd" id="5"]
+[ext_resource type="Script" path="res://effects/fog/fog_layer.gd" id="6"]
+[ext_resource type="Script" path="res://effects/rain/rain_splashes.gd" id="7"]
+[ext_resource type="Script" path="res://effects/leaves/leaf_storm.gd" id="8"]
+[ext_resource type="Script" path="res://effects/post/wet_ground.gd" id="9"]
+[ext_resource type="Script" path="res://effects/post/light_shafts.gd" id="10"]
+[ext_resource type="Script" path="res://effects/post/camera_lens.gd" id="11"]
+[ext_resource type="Script" path="res://effects/ambience/ambience.gd" id="12"]
+[ext_resource type="Script" path="res://structures/terrain/terrain.gd" id="13"]
+[ext_resource type="Script" path="res://cover/old_oak/old_oak.gd" id="14"]
+[ext_resource type="Script" path="res://environment/wind_tree/wind_tree.gd" id="15"]
+[ext_resource type="Script" path="res://environment/pine_tree/pine_tree.gd" id="16"]
+[ext_resource type="Script" path="res://cover/ruined_wall/ruined_wall.gd" id="17"]
+[ext_resource type="Script" path="res://structures/roof/roof.gd" id="18"]
+[ext_resource type="Script" path="res://cover/hay_bales/hay_bales.gd" id="19"]
+[ext_resource type="Script" path="res://cover/rock_face/rock_face.gd" id="20"]
+[ext_resource type="Script" path="res://structures/boulder/boulder.gd" id="21"]
+[ext_resource type="Script" path="res://structures/crate_stack/crate_stack.gd" id="22"]
+[ext_resource type="Script" path="res://cover/shipping_container/shipping_container.gd" id="23"]
+[ext_resource type="Script" path="res://cover/boiler/boiler.gd" id="24"]
+[ext_resource type="Script" path="res://cover/water_tower/water_tower.gd" id="25"]
+[ext_resource type="Script" path="res://structures/car_wreck/car_wreck.gd" id="26"]
+[ext_resource type="Script" path="res://structures/tree_stump/tree_stump.gd" id="27"]
+[ext_resource type="Script" path="res://environment/bush/bush.gd" id="28"]
+[ext_resource type="Script" path="res://environment/street_lamp/street_lamp.gd" id="29"]
+[ext_resource type="Script" path="res://environment/fire_barrel/fire_barrel.gd" id="30"]
+[ext_resource type="Script" path="res://environment/windmill/windmill.gd" id="31"]
+[ext_resource type="Script" path="res://environment/wooden_fence/wooden_fence.gd" id="32"]
+[ext_resource type="Script" path="res://creatures/starlings/starlings.gd" id="33"]
+[ext_resource type="PackedScene" path="res://player/player.tscn" id="34"]
+[ext_resource type="Script" path="res://core/game_camera.gd" id="35"]
+
+[node name="Gallery" type="Node2D"]
+script = ExtResource("1")
+level_title = ""
+level_subtitle = ""
+next_level = ""
+level_width = 7200
+level_height = 768
+ground_y = 635
+spawn_point = Vector2(60, 630)
+ground_surface = "grass"
+sunset_seconds = 9999
+
+[node name="Effects" type="Node" parent="."]
+
+[node name="WeatherController" type="Node" parent="Effects"]
+script = ExtResource("2")
+storm = 0.5
+wind_strength = 0.8
+
+[node name="Sky" type="CanvasLayer" parent="Effects"]
+script = ExtResource("3")
+sun_screen_position = Vector2(700, 600)
+cloud_cover = 0.45
+
+[node name="DistantScenery" type="Node2D" parent="Effects"]
+script = ExtResource("4")
+setting = 0
+
+[node name="FarRain" type="Node2D" parent="Effects"]
+script = ExtResource("5")
+depth_max = 0.45
+drops_per_storm = 6000
+max_drops = 12000
+z_index = -50
+
+[node name="FogBank" type="Node2D" parent="Effects"]
+script = ExtResource("6")
+density = 0.2
+parallax = 0.6
+z_index = -45
+
+[node name="GroundFog" type="Node2D" parent="Effects"]
+script = ExtResource("6")
+mode = 1
+density = 0.15
+parallax = 1
+z_index = 15
+
+[node name="NearRain" type="Node2D" parent="Effects"]
+script = ExtResource("5")
+depth_min = 0.45
+depth_max = 1
+drops_per_storm = 1500
+max_drops = 3000
+z_index = 40
+
+[node name="RainSplashes" type="Node2D" parent="Effects"]
+script = ExtResource("7")
+
+[node name="LeafStorm" type="Node2D" parent="Effects"]
+script = ExtResource("8")
+density = 0.5
+
+[node name="WetGround" type="CanvasLayer" parent="Effects"]
+script = ExtResource("9")
+
+[node name="LightShafts" type="CanvasLayer" parent="Effects"]
+script = ExtResource("10")
+strength = 0.4
+
+[node name="CameraLens" type="CanvasLayer" parent="Effects"]
+script = ExtResource("11")
+
+[node name="Ambience" type="Node" parent="Effects"]
+script = ExtResource("12")
+crickets = false
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Ground" type="StaticBody2D" parent="World"]
+script = ExtResource("13")
+bottom = 900
+detail_seed = 1
+points = PackedVector2Array(-20, 635, 7220, 635)
+
+[node name="Oak" type="Node2D" parent="World"]
+script = ExtResource("14")
+position = Vector2(120, 635)
+size = 1.15
+tree_seed = 4
+
+[node name="Oak2" type="Node2D" parent="World"]
+script = ExtResource("14")
+position = Vector2(450, 635)
+size = 1.25
+tree_seed = 9
+
+[node name="Tree" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(750, 635)
+tree_seed = 7
+size = 1.1
+
+[node name="Pine" type="Node2D" parent="World"]
+script = ExtResource("16")
+position = Vector2(970, 635)
+height = 280
+tree_seed = 3
+
+[node name="Pine2" type="Node2D" parent="World"]
+script = ExtResource("16")
+position = Vector2(1130, 635)
+height = 230
+tree_seed = 8
+ragged = 0.5
+
+[node name="Wall" type="Node2D" parent="World"]
+script = ExtResource("17")
+position = Vector2(1330, 635)
+size = Vector2(250, 150)
+crumble = 0.45
+windows = 1
+wall_seed = 4
+gable = 55
+
+[node name="HouseRoof" type="StaticBody2D" parent="World"]
+script = ExtResource("18")
+position = Vector2(1646, 460)
+profile = PackedVector2Array(0, 0, 114, -70, 228, 0)
+thickness = 14
+damage = 0.35
+chimney_at = 0.72
+weathervane = true
+roof_seed = 2
+
+[node name="House" type="Node2D" parent="World"]
+script = ExtResource("17")
+position = Vector2(1660, 635)
+size = Vector2(200, 175)
+crumble = 0.1
+windows = 2
+wall_seed = 8
+
+[node name="ShedRoof" type="StaticBody2D" parent="World"]
+script = ExtResource("18")
+position = Vector2(1940, 495)
+profile = PackedVector2Array(0, 0, 60, -30, 150, -30, 190, -12)
+thickness = 12
+cladding = 2
+damage = 0.5
+roof_seed = 5
+
+[node name="Shed" type="Node2D" parent="World"]
+script = ExtResource("17")
+position = Vector2(1950, 635)
+size = Vector2(170, 140)
+crumble = 0
+windows = 1
+wall_seed = 13
+ivy = 0.6
+
+[node name="Chapel" type="Node2D" parent="World"]
+script = ExtResource("17")
+position = Vector2(2210, 635)
+size = Vector2(190, 175)
+crumble = 0.5
+windows = 2
+wall_seed = 23
+gable = 70
+
+[node name="Bales" type="Node2D" parent="World"]
+script = ExtResource("19")
+position = Vector2(2490, 635)
+bottom_row = 3
+rows = 2
+radius = 27
+
+[node name="Rock" type="Node2D" parent="World"]
+script = ExtResource("20")
+position = Vector2(2750, 635)
+size = Vector2(170, 116)
+rock_seed = 3
+
+[node name="Boulder" type="StaticBody2D" parent="World"]
+script = ExtResource("21")
+position = Vector2(2990, 635)
+size = Vector2(64, 34)
+rock_seed = 3
+
+[node name="Crates" type="StaticBody2D" parent="World"]
+script = ExtResource("22")
+position = Vector2(3110, 635)
+stacks = PackedInt32Array(3, 1)
+crate_size = 33
+
+[node name="Container" type="Node2D" parent="World"]
+script = ExtResource("23")
+position = Vector2(3270, 635)
+size = Vector2(240, 96)
+door_end = 2
+rust_seed = 3
+door_ajar = true
+
+[node name="Boiler" type="Node2D" parent="World"]
+script = ExtResource("24")
+position = Vector2(3570, 635)
+length = 210
+
+[node name="Tower" type="Node2D" parent="World"]
+script = ExtResource("25")
+position = Vector2(3870, 635)
+height = 300
+
+[node name="Car" type="StaticBody2D" parent="World"]
+script = ExtResource("26")
+position = Vector2(4090, 635)
+size = 1.1
+
+[node name="Stump" type="StaticBody2D" parent="World"]
+script = ExtResource("27")
+position = Vector2(4310, 635)
+axe = true
+
+[node name="Bush" type="Node2D" parent="World"]
+script = ExtResource("28")
+position = Vector2(4430, 635)
+size = Vector2(70, 40)
+bush_seed = 2
+
+[node name="Lamp" type="Node2D" parent="World"]
+script = ExtResource("29")
+position = Vector2(4570, 503)
+post_height = 132
+behaviour = 0
+turns_on_at = 0
+
+[node name="Barrel" type="Node2D" parent="World"]
+script = ExtResource("30")
+position = Vector2(4730, 635)
+
+[node name="Windmill" type="Node2D" parent="World"]
+script = ExtResource("31")
+position = Vector2(4870, 635)
+
+[node name="Fence" type="Node2D" parent="World"]
+script = ExtResource("32")
+position = Vector2(5070, 635)
+length = 280
+decay = 0.5
+
+[node name="Creatures" type="Node2D" parent="."]
+
+[node name="Starlings" type="Node2D" parent="Creatures"]
+script = ExtResource("33")
+starts_at = 0
+ends_at = 1
+
+[node name="Player" parent="." instance=ExtResource("34")]
+
+[node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+script = ExtResource("35")
+target = NodePath("../Player")

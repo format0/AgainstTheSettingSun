@@ -28,13 +28,7 @@ func _ready() -> void:
 func _rebuild() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = rock_seed
-	_poly = PackedVector2Array()
-	var n := 12
-	for i in n + 1:
-		var u := float(i) / n
-		var a := PI + u * PI
-		var r := 1.0 + rng.randf_range(-0.1, 0.08)
-		_poly.append(Vector2(cos(a) * size.x * 0.5 * r, sin(a) * size.y * r if i > 0 and i < n else 0.0))
+	_poly = DrawKit.rock_outline(size, rock_seed, 1, 1 if size.x > 50.0 else 0)
 	if not is_inside_tree():
 		return
 	if _collision == null:
@@ -50,6 +44,7 @@ func get_rain_edges() -> Array:
 
 func _draw() -> void:
 	draw_colored_polygon(_poly, Color.BLACK)
+	# moss and grass on the top
 	for k in 7:
-		var p := _poly[3 + k % 6]
+		var p := _poly[clampi(_poly.size() / 2 - 3 + k, 0, _poly.size() - 1)]
 		draw_line(p, p + Vector2(-1.0 - Weather.wind * 2.0, -4.0 - k % 3 * 2.0), Color.BLACK, 1.0)

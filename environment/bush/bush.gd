@@ -21,6 +21,7 @@ extends Node2D
 
 var _clumps: Array[Vector4] = []
 var _twigs: Array[Vector4] = []
+var _leafy: Array[PackedVector2Array] = []
 
 
 func _ready() -> void:
@@ -35,6 +36,9 @@ func _grow() -> void:
 	for i in 7:
 		var u := rng.randf_range(-0.5, 0.5)
 		_clumps.append(Vector4(u * size.x, -size.y * (0.35 + rng.randf() * 0.5) * (1.0 - absf(u) * 0.8), size.y * rng.randf_range(0.25, 0.42), rng.randf() * TAU))
+	_leafy.clear()
+	for k in _clumps:
+		_leafy.append(DrawKit.foliage(Vector2(k.z * 1.15, k.z * 0.85), rng.randi(), clampf(size.y * 0.08, 2.2, 4.0)))
 	for i in 9:
 		_twigs.append(Vector4(rng.randf_range(-0.4, 0.4) * size.x, rng.randf_range(-1.6, -1.0) + rng.randf_range(-0.5, 0.5), size.y * rng.randf_range(0.6, 1.25), rng.randf() * TAU))
 	queue_redraw()
@@ -61,11 +65,9 @@ func _draw() -> void:
 				draw_line(p, p + Vector2.from_angle(a + (0.9 if k % 2 == 0 else -0.9)) * 5.0, c, 0.8)
 	if thorny:
 		return
-	for k in _clumps:
+	for i in _clumps.size():
+		var k := _clumps[i]
 		var sway := Vector2(bend * -k.y * 0.9 + sin(t * 1.9 + k.w) * Weather.wind * 1.2, 0)
-		var pts := PackedVector2Array()
-		for j in 18:
-			var a := j * TAU / 18.0
-			var r := k.z * (1.0 + 0.12 * sin(a * 5.0 + k.w) + 0.06 * sin(a * 9.0 + t * (4.0 + Weather.wind * 8.0)))
-			pts.append(Vector2(k.x, k.y) + sway + Vector2(cos(a), sin(a) * 0.8) * r)
-		draw_colored_polygon(pts, c)
+		draw_set_transform(Vector2(k.x, k.y) + sway, sin(t * (3.0 + Weather.wind * 5.0) + k.w) * 0.03 * Weather.wind)
+		draw_colored_polygon(_leafy[i], c)
+	draw_set_transform(Vector2.ZERO)

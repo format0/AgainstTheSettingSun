@@ -24,6 +24,7 @@ extends Cover
 
 var _bales: Array[PackedVector2Array] = []
 var _straw: Array[Vector4] = []
+var _fork := PackedVector2Array()
 
 
 func _ready() -> void:
@@ -42,12 +43,39 @@ func _rebuild() -> void:
 		if n <= 0:
 			break
 		for i in n:
-			var c := Vector2((i - (n - 1) * 0.5) * d + rng.randf_range(-3, 3), -radius - r * d * 0.86)
-			_bales.append(DrawKit.blob(c, Vector2(radius, radius) * rng.randf_range(0.95, 1.05), rng.randi(), 0.06, 24, false))
-			for k in 5:
-				var a := rng.randf_range(-PI, 0.0)
-				_straw.append(Vector4(c.x + cos(a) * radius, c.y + sin(a) * radius, a, rng.randf_range(5, 11)))
+			var c := Vector2((i - (n - 1) * 0.5) * d + rng.randf_range(-3, 3), -radius * 0.94 - r * d * 0.84)
+			_bales.append(_bale(rng, c, radius * rng.randf_range(0.95, 1.05)))
+			# loose wisps blowing off the top
+			for k in 9:
+				var a := rng.randf_range(-PI * 0.95, -PI * 0.05)
+				_straw.append(Vector4(c.x + cos(a) * radius * 0.95, c.y + sin(a) * radius * 0.92, a + rng.randf_range(-0.5, 0.5), rng.randf_range(4, 12)))
+	# a pitchfork left stuck in the top bale
+	_fork = PackedVector2Array()
+	if bale_seed % 2 == 1 and not _bales.is_empty():
+		var topb := _bales[_bales.size() - 1]
+		var tc := Vector2.ZERO
+		for q in topb:
+			tc += q
+		tc /= topb.size()
+		var base := tc + Vector2(radius * 0.3, -radius * 0.55)
+		_fork = PackedVector2Array([base, base + Vector2(radius * 0.9, -radius * 1.7)])
 	queue_redraw()
+
+
+## A round bale seen end-on: sagging a little under its weight, its edge fuzzy with straw.
+func _bale(rng: RandomNumberGenerator, c: Vector2, r: float) -> PackedVector2Array:
+	var pts := PackedVector2Array()
+	var n := int(r * 3.2)
+	for k in n:
+		var a := k * TAU / n
+		var rr := r * (1.0 + rng.randf_range(-0.025, 0.025))
+		var p := Vector2(cos(a) * rr * 1.03, sin(a) * rr * (0.94 if sin(a) > 0.0 else 1.0))
+		p.y = minf(p.y, r * 0.86)   # flattened where it sits
+		if k % 4 == 0 and sin(a) < 0.6:
+			# a straw end poking out of the edge
+			p += Vector2.from_angle(a + rng.randf_range(-0.3, 0.3)) * rng.randf_range(0.6, 2.2)
+		pts.append(c + p)
+	return pts
 
 
 func _cover_shapes() -> Array[PackedVector2Array]:
@@ -66,4 +94,15 @@ func _draw() -> void:
 		var bend := -Weather.wind * 0.6 * (0.4 + Weather.gust_at(global_position.x + s.x)) + sin(Weather.time * 6.0 + s.z * 4.0) * 0.15 * Weather.wind
 		var dir := Vector2.from_angle(s.z + bend)
 		draw_line(Vector2(s.x, s.y), Vector2(s.x, s.y) + dir * s.w, Color.BLACK, 1.0)
+	if _fork.size() == 2:
+		var a := _fork[0]
+		var b := _fork[1]
+		draw_line(a, b, Color.BLACK, 2.0)
+		var dir := (a - b).normalized()
+		var side := dir.orthogonal()
+		# the tines go into the hay; only the crossbar and the handle show
+		draw_line(a - side * 5.0, a + side * 5.0, Color.BLACK, 2.0)
+		for k in 3:
+			var t0 := a + side * (k - 1) * 5.0
+			draw_line(t0, t0 + dir * 6.0, Color.BLACK, 1.4)
 	_draw_cover_outline()

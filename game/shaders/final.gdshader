@@ -25,6 +25,8 @@ uniform float contrast = 1.0;
 uniform float vignette = 0.5;
 uniform float grain = 0.045;
 uniform float darkness = 0.0;
+uniform float red_shift = 0.0;   // the light turning red as the sun goes down
+uniform float night = 0.0;       // the blue hour: shadows turning cold
 uniform float light = 1.0;
 uniform float motes = 1.0;
 uniform float wind = 0.5;
@@ -116,6 +118,10 @@ void fragment() {
 	// grade: exposure, golden warmth, saturation, contrast, the film curve of the original
 	col *= exposure;
 	col *= vec3(1.0 + 0.12 * warmth, 1.0 + 0.03 * warmth, 1.0 - 0.16 * warmth);
+	// sundown: the gold drains out of the light and leaves red, then the darks go blue
+	col *= vec3(1.0 + 0.10 * red_shift, 1.0 - 0.16 * red_shift, 1.0 - 0.20 * red_shift);
+	float l_n = dot(col, vec3(0.299, 0.587, 0.114));
+	col = mix(col, vec3(l_n) * vec3(0.62, 0.72, 1.25), night * 0.45 * (1.0 - smoothstep(0.05, 0.4, l_n)));
 	float lum = dot(col, vec3(0.299, 0.587, 0.114));
 	col = mix(vec3(lum), col, saturation);
 	col = (col - 0.5) * contrast + 0.5;

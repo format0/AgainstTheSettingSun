@@ -216,6 +216,9 @@ func _process(_delta: float) -> void:
 	m.set_shader_parameter("vignette", VFX.v("vignette"))
 	m.set_shader_parameter("grain", VFX.v("grain"))
 	m.set_shader_parameter("darkness", Daylight.urgency())
+	var pr := Daylight.progress
+	m.set_shader_parameter("red_shift", VFX.v("sunset_red") * smoothstep(0.08, 0.6, pr) * (1.0 - 0.5 * smoothstep(0.8, 1.0, pr)))
+	m.set_shader_parameter("night", VFX.v("blue_hour") * smoothstep(0.6, 0.95, pr))
 	m.set_shader_parameter("motes", 1.0 if VFX.on("motes") else 0.0)
 	m.set_shader_parameter("wind", Weather.wind)
 

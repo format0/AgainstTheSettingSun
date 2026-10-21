@@ -26,8 +26,10 @@ inside the game by itself.
 everything that shapes the look: bloom, threshold and wide glow, light shafts, lamp and sun
 glow, edge softening, diffusion, haze and fog, exposure, warmth, saturation, contrast,
 vignette, grain, colour fringing, lens rain, the amount of rain, rain stopping under roofs,
-gust sheets, drips, splashes, leaves, bats, fireflies, dust in the light, steam, chimney
-smoke and sparks. It also has the time of day (with "Stop the sun"), the storm strength,
+gust sheets, drips, splashes, leaves, bats, starlings, fireflies, dust in the light, steam,
+chimney smoke and sparks, and the sundown: how red the light turns as the sun goes, the
+cold blue hour after it, the afterglow on the clouds, the sun flattening on the horizon,
+silent lightning far away and the mist rising at dusk. It also has the time of day (with "Stop the sun"), the storm strength,
 "Nothing can kill me", a lightning button, and a switch for each effect node in the level.
 Settings are saved when the panel closes (`user://vfx.cfg`); **Copy** puts them all on the
 clipboard, and **Reset** goes back to the defaults in `core/vfx.gd`.
@@ -41,7 +43,7 @@ clipboard, and **Reset** goes back to the defaults in `core/vfx.gd`.
 | **Goal** | Reach the `LevelExit` at the end of each level. |
 | **The sun sets** | Each level has a clock (`Level.sunset_seconds`). The sky drains from orange to night, lamps switch on, the picture closes in. When the light is gone the level starts over from the beginning. |
 | **Dying** | Creatures, molten steel, deep water, falls, crushing machinery and falling trees kill. You come back at the last `Checkpoint`, and whatever you changed before it stays changed (levers, fallen trees, broken bridges, moved crates). The sun keeps setting, so every death costs time. |
-| **Shadows** | The runner is black like everything else. In front of a black shape (a `Cover`: a wall, a hay stack, a big trunk, a container...) he disappears: creatures that hunt by sight can't see him and walk right past him. A faint warm rim shows the player where he is. Light (street lamps, lanterns, fire, molten steel) takes the shadow away. |
+| **Shadows** | The runner is black like everything else. In front of a black shape (a `Cover`: a wall, a hay stack, a big trunk, a container...) he disappears: creatures that hunt by sight can't see him and walk right past him. While he moves there, a faint warm rim shows the player where he is; standing still he vanishes completely (`Player.rim_when_still`). Light (street lamps, lanterns, fire, molten steel) takes the shadow away. |
 | **Creatures** | *Hunters* (Stalker, Hound) see you in a cone in front of them, freeze, shriek and chase you. Break their line of sight or hide and they search for a while, then go back. *Blind ones* (Crawler) just walk their round and find you by touch. None of them can jump. Loud landings, crashes and grinding gates make hunters come to look. Three others behave differently: the *Dangler* hangs from a beam or a branch and drops on you when you pass beneath it in the open (bait it, step back, go while it climbs); the *Burrower* lives under soft ground and bursts up where it hears a step or feels you standing (jump its patch or keep running); the *Watcher* sits high up and sweeps a beam of light. It can't hurt you, but its beam takes your shadow away, and when it finds you it screams and the hunters come. |
 | **Storm** | Each level has its own weather (`WeatherController.storm`): rain, wind, lightning. Wind moves trees, grass, cloth, chains, swinging beams, tarps and drifting rafts, never the runner. |
 
@@ -127,16 +129,20 @@ that raises the alarm).
 ### creatures/
 Harmless life: `Frog`, `Crow` (sit on power lines, fly up when you come), `Bats` (come out at
 dusk and follow the view), `Fireflies` (in an area, blinking as the light goes), `StrayCat`
-(walks a ledge or a beam, washes, keeps away from you), `Rat`, `JumpingFish`, `PlasticBag`.
+(walks a ledge or a beam, washes, keeps away from you), `Rat`, `JumpingFish`, `PlasticBag`,
+`Starlings` (a murmuration flying home over the horizon while the sun goes down).
 
 ### cover/
-`Cover` is the base. `RuinedWall`, `OldOak`, `HayBales`, `RockFace`, `ShippingContainer`,
+`Cover` is the base. `RuinedWall` (from a broken wall to a house's end wall with a `gable`, with
+window bars, missing bricks, beams and ivy), `OldOak`, `HayBales`, `RockFace`, `ShippingContainer`,
 `Boiler`, `WaterTower`, `HangingTarp` (the wind can blow it aside).
 
 ### structures/
 `SolidBlock` (plain, broken concrete, planks, riveted steel, earth or invisible), `Terrain`
 (natural ground along a line of points, with grass, stones and roots), `Girder`, `Catwalk`
-(one-way), `CrateStack`, `Boulder`, `TreeStump`, `CarWreck`.
+(one-way), `CrateStack`, `Boulder`, `TreeStump`, `CarWreck`, `Roof` (tiles, shingles or corrugated
+iron along a line of points, with missing tiles, holes showing the rafters, gutters, a chimney
+and a weathervane that turns with the wind).
 
 ### environment/
 `GrassField`, `WindTree`, `PineTree`, `Bush`, `Cattails`, `WoodenFence`, `PowerLine`,
@@ -156,6 +162,9 @@ Level: `get_tree().call_group("dust_emitters", "burst", position, count, width)`
 ---
 
 ## Making a new level
+
+`levels/gallery/gallery.tscn` puts the trees, buildings, roofs, rocks, machinery and props side
+by side on a flat strip, to look at them against the sunset (run it with F6, F1 to scrub the time).
 
 1. Duplicate a level scene into a new folder, or start a new scene with a `Node2D` root and attach `levels/level.gd`.
 2. On the root, set the title, the next level, width, spawn point and the sunset.

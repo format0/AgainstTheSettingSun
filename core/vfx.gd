@@ -31,6 +31,13 @@ const SETTINGS := {
 	"grain": [0.045, 0.0, 0.15, "Film grain", "Grade"],
 	"chroma": [1.0, 0.0, 3.0, "Colour fringing", "Grade"],
 	"lens_rain": [1.0, 0.0, 2.0, "Raindrops on the lens", "Grade"],
+	# sundown
+	"sunset_red": [1.0, 0.0, 2.0, "Reddening as the sun sets", "Sundown"],
+	"blue_hour": [1.0, 0.0, 2.0, "Blue hour (cold shadows at night)", "Sundown"],
+	"afterglow": [1.0, 0.0, 2.0, "Afterglow on the clouds", "Sundown"],
+	"sun_squash": [1.0, 0.0, 1.5, "Sun flattening at the horizon", "Sundown"],
+	"heat_lightning": [1, 0, 1, "Silent lightning far away", "Sundown"],
+	"evening_mist": [1.0, 0.0, 2.0, "Mist rising at dusk", "Sundown"],
 	# weather
 	"rain": [1.0, 0.0, 2.0, "Rain amount", "Weather"],
 	"rain_shelter": [1, 0, 1, "Rain stops under roofs", "Weather"],
@@ -40,6 +47,7 @@ const SETTINGS := {
 	"leaves": [1.0, 0.0, 2.5, "Blowing leaves", "Weather"],
 	# life
 	"bats": [1, 0, 1, "Bats at dusk", "Life"],
+	"flocks": [1, 0, 1, "Starlings going home", "Life"],
 	"fireflies": [1, 0, 1, "Fireflies", "Life"],
 	"motes": [1, 0, 1, "Dust in the light", "Life"],
 	"steam": [1, 0, 1, "Steam from hot things", "Life"],

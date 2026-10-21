@@ -77,8 +77,18 @@ func _draw() -> void:
 	for k in 3:
 		draw_rect(Rect2(-13.5, -h + h * (0.12 + k * 0.38) - 1.5, 27, 3), c)
 	draw_rect(Rect2(-13, -h - 2, 26, 3), c)
+	# a dent in the rim and the ends of the planks it burns
+	draw_colored_polygon(PackedVector2Array([Vector2(4, -h - 2), Vector2(8, -h - 4), Vector2(13, -h - 2)]), c)
+	draw_line(Vector2(-6, -h - 1), Vector2(-11, -h - 12), c, 2.6)
+	draw_line(Vector2(3, -h - 1), Vector2(7, -h - 9), c, 2.0)
 	if Engine.is_editor_hint():
 		return
+	# the fire shows through holes rusted into the drum
+	var t0 := Weather.time
+	for hole: Vector3 in [Vector3(-6, -h * 0.3, 1.6), Vector3(4, -h * 0.55, 1.2), Vector3(-2, -h * 0.72, 1.0), Vector3(7, -h * 0.22, 0.9)]:
+		var glow := intensity * (0.7 + 0.3 * sin(t0 * 17.0 + hole.x))
+		draw_circle(Vector2(hole.x, hole.y), hole.z + 1.2, Color(1.0, 0.35, 0.08, 0.35 * glow))
+		draw_circle(Vector2(hole.x, hole.y), hole.z, Color(1.0, 0.62, 0.22, 0.95 * glow))
 	# flames, bent downwind, drawn as glowing tongues over the rim
 	var t := Weather.time
 	for i in 5:

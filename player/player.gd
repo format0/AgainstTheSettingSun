@@ -33,6 +33,10 @@ signal died(cause: String)
 ## Running speed while pushing or pulling a crate.
 @export var grab_speed := 62.0
 
+@export_group("Shadow")
+## How much of the warm rim stays while he stands still in the shadows (0 = he vanishes).
+@export_range(0.0, 1.0) var rim_when_still := 0.0
+
 var facing := 1
 var dead := false
 var cause_of_death := ""
@@ -117,7 +121,10 @@ func _physics_process(delta: float) -> void:
 	_was_on_floor = is_on_floor()
 
 	in_shadow = Cover.hides(_body_points()) and not LightSource.lit_at(global_position + Vector2(0, -20))
-	_rim = move_toward(_rim, 1.0 if in_shadow else 0.0, delta * 3.0)
+	# the rim only shows while he moves in the shadows; standing still, he is gone
+	var moving := absf(velocity.x) > 8.0 or not is_on_floor()
+	var rim_target := (1.0 if moving else rim_when_still) if in_shadow else 0.0
+	_rim = move_toward(_rim, rim_target, delta * (4.0 if rim_target > _rim else 1.6))
 	_rim_material.set_shader_parameter("rim", _rim)
 
 	runner.face(facing)
