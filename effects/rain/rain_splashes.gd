@@ -76,5 +76,5 @@ func _draw() -> void:
 	for p in _p:
 		var s: float = p.size
 		var c := color
-		c.a = 0.55 * p.life / p.max
+		c.a = 0.55 * p.life / p.max * (0.35 + 0.65 * Daylight.light())
 		draw_rect(Rect2(p.pos - Vector2(s, s) * 0.5, Vector2(s, s)), c)

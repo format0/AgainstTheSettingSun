@@ -61,6 +61,12 @@ func _process(_delta: float) -> void:
 		if e is RainLayer and _is_on(e):
 			drops += e.visible_drops
 	lines.append("raindrops %d   (L lightning, R restart)" % drops)
+	var player := get_tree().get_first_node_in_group("player") as Player
+	var hunting := 0
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if e.state == Enemy.State.CHASE or e.state == Enemy.State.ALERT:
+			hunting += 1
+	lines.append("sunset %d%%   in shadow: %s   hunted by: %d" % [int(Daylight.progress * 100.0), "yes" if player and player.in_shadow else "no", hunting])
 	lines.append("")
 	for i in mini(KEYS.size(), _effects.size()):
 		var e := _effects[i]

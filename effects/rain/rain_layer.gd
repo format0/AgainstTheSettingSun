@@ -60,6 +60,7 @@ func _process(_delta: float) -> void:
 	_mat.set_shader_parameter("depth_max", depth_max)
 	_mat.set_shader_parameter("flash", Weather.flash)
 	_mat.set_shader_parameter("opacity", opacity)
+	_mat.set_shader_parameter("light", Daylight.light())
 	var ground := Level.current.ground_y if Level.current else 635.0
 	_mat.set_shader_parameter("ground_y", ground - view.position.y)
 	var lamps := PackedVector3Array()

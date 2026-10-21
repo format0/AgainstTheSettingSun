@@ -29,3 +29,4 @@ func _process(_delta: float) -> void:
 	material.set_shader_parameter("vignette", vignette)
 	material.set_shader_parameter("grain", grain)
 	material.set_shader_parameter("aspect", size.x / size.y)
+	material.set_shader_parameter("darkness", Daylight.urgency())

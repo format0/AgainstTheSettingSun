@@ -15,5 +15,5 @@ func _process(_delta: float) -> void:
 	var size := GameCamera.view_rect.size
 	material.set_shader_parameter("sun_uv", Weather.sun_screen_pos / size)
 	material.set_shader_parameter("aspect", size.x / size.y)
-	material.set_shader_parameter("strength", strength)
+	material.set_shader_parameter("strength", strength * (1.0 - smoothstep(0.35, 0.85, Daylight.progress)))
 	material.set_shader_parameter("samples", samples)

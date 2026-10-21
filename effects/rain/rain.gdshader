@@ -17,6 +17,7 @@ uniform float ground_y = 635.0;     // ground line in screen pixels
 uniform vec3 lamps[6];             // screen x, screen y, brightness
 uniform vec3 rain_color : source_color = vec3(0.80, 0.74, 0.70);
 uniform vec3 lit_color : source_color = vec3(1.0, 0.80, 0.52);
+uniform float light = 1.0;
 
 varying float v_along;
 varying float v_across;
@@ -49,8 +50,8 @@ void vertex() {
 		lit += lamps[i].z * (cone + exp(-length(d) / 26.0));
 	}
 	lit = clamp(lit, 0.0, 1.5);
-	v_col = mix(rain_color, lit_color, clamp(lit, 0.0, 1.0)) + vec3(0.2, 0.25, 0.4) * flash;
-	v_alpha = mix(0.04, 0.16, z) * (1.0 + lit * 3.0 + flash * 1.6) * opacity;
+	v_col = mix(rain_color * (0.25 + 0.75 * light), lit_color, clamp(lit, 0.0, 1.0)) + vec3(0.2, 0.25, 0.4) * flash;
+	v_alpha = mix(0.04, 0.16, z) * (0.5 + 0.5 * light + lit * 3.0 + flash * 1.6) * opacity;
 	v_along = corner.y;
 	v_across = corner.x * 2.0 - 1.0;
 	v_y = VERTEX.y;

@@ -42,6 +42,7 @@ func _process(_delta: float) -> void:
 	_mat.set_shader_parameter("ground_y", ground - view.position.y)
 	_mat.set_shader_parameter("flash", Weather.flash)
 	_mat.set_shader_parameter("sun_pos", Weather.sun_screen_pos)
+	_mat.set_shader_parameter("light", Daylight.light())
 	var lamps := PackedVector3Array()
 	for p in StreetLamp.lights_near(view):
 		lamps.append(Vector3(p.x - view.position.x, p.y - view.position.y, p.z))

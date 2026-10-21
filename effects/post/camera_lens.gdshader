@@ -12,6 +12,7 @@ uniform float fringe = 1.0;
 uniform float vignette = 0.55;
 uniform float grain = 0.05;
 uniform float aspect = 1.778;
+uniform float darkness = 0.0;   // the night closing in at the end of the level
 
 float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 
@@ -76,6 +77,8 @@ void fragment() {
 	col = col / (1.0 + max(col - 0.92, 0.0) * 0.5);
 	vec2 v = uv0 - 0.5;
 	col *= 1.0 - vignette * pow(length(v * vec2(1.0, 0.82)) * 1.25, 2.4);
+	float closing = 1.0 - smoothstep(0.25 - darkness * 0.2, 0.75 - darkness * 0.45, length(v * vec2(aspect, 1.0) * 0.6));
+	col *= mix(1.0, closing, darkness);
 	col += (hash12(FRAGCOORD.xy + fract(weather_time * 7.3) * 731.0) - 0.5) * grain * sqrt(max(lum, 0.0));
 	COLOR = vec4(col, 1.0);
 }

@@ -1,0 +1,654 @@
+[gd_scene load_steps=44 format=3]
+
+[ext_resource type="Script" path="res://levels/level.gd" id="1"]
+[ext_resource type="Script" path="res://effects/weather/weather_controller.gd" id="2"]
+[ext_resource type="Script" path="res://effects/sky/sky.gd" id="3"]
+[ext_resource type="Script" path="res://effects/lightning/lightning.gd" id="4"]
+[ext_resource type="Script" path="res://effects/distant_scenery/distant_scenery.gd" id="5"]
+[ext_resource type="Script" path="res://effects/rain/rain_layer.gd" id="6"]
+[ext_resource type="Script" path="res://effects/fog/fog_layer.gd" id="7"]
+[ext_resource type="Script" path="res://effects/rain/rain_splashes.gd" id="8"]
+[ext_resource type="Script" path="res://effects/leaves/leaf_storm.gd" id="9"]
+[ext_resource type="Script" path="res://effects/post/wet_ground.gd" id="10"]
+[ext_resource type="Script" path="res://effects/post/light_shafts.gd" id="11"]
+[ext_resource type="Script" path="res://effects/post/camera_lens.gd" id="12"]
+[ext_resource type="Script" path="res://effects/ambience/ambience.gd" id="13"]
+[ext_resource type="Script" path="res://structures/terrain/terrain.gd" id="14"]
+[ext_resource type="Script" path="res://environment/pine_tree/pine_tree.gd" id="15"]
+[ext_resource type="Script" path="res://structures/boulder/boulder.gd" id="16"]
+[ext_resource type="Script" path="res://cover/rock_face/rock_face.gd" id="17"]
+[ext_resource type="Script" path="res://cover/ruined_wall/ruined_wall.gd" id="18"]
+[ext_resource type="Script" path="res://enemies/hound/hound.gd" id="19"]
+[ext_resource type="Script" path="res://environment/puddle/puddle.gd" id="20"]
+[ext_resource type="Script" path="res://gameplay/checkpoint/checkpoint.gd" id="21"]
+[ext_resource type="Script" path="res://structures/girder/girder.gd" id="22"]
+[ext_resource type="Script" path="res://interactive/moving_platform/moving_platform.gd" id="23"]
+[ext_resource type="Script" path="res://hazards/deep_water/deep_water.gd" id="24"]
+[ext_resource type="Script" path="res://environment/cattails/cattails.gd" id="25"]
+[ext_resource type="Script" path="res://interactive/collapsing_bridge/collapsing_bridge.gd" id="26"]
+[ext_resource type="Script" path="res://environment/chasm/chasm.gd" id="27"]
+[ext_resource type="Script" path="res://hazards/kill_zone/kill_zone.gd" id="28"]
+[ext_resource type="Script" path="res://environment/rusty_pipes/rusty_pipes.gd" id="29"]
+[ext_resource type="Script" path="res://interactive/lever/lever.gd" id="30"]
+[ext_resource type="Script" path="res://interactive/sliding_gate/sliding_gate.gd" id="31"]
+[ext_resource type="Script" path="res://cover/boiler/boiler.gd" id="32"]
+[ext_resource type="Script" path="res://environment/lantern/lantern.gd" id="33"]
+[ext_resource type="Script" path="res://interactive/pressure_plate/pressure_plate.gd" id="34"]
+[ext_resource type="Script" path="res://interactive/falling_tree/falling_tree.gd" id="35"]
+[ext_resource type="Script" path="res://cover/old_oak/old_oak.gd" id="36"]
+[ext_resource type="Script" path="res://enemies/stalker/stalker.gd" id="37"]
+[ext_resource type="Script" path="res://gameplay/level_exit/level_exit.gd" id="38"]
+[ext_resource type="Script" path="res://creatures/plastic_bag/plastic_bag.gd" id="39"]
+[ext_resource type="PackedScene" path="res://player/player.tscn" id="40"]
+[ext_resource type="Script" path="res://core/game_camera.gd" id="41"]
+[ext_resource type="Script" path="res://environment/grass_field/grass_field.gd" id="42"]
+[ext_resource type="Script" path="res://ui/debug_overlay.gd" id="43"]
+
+[node name="Level03" type="Node2D"]
+script = ExtResource("1")
+level_title = "III"
+level_subtitle = "The Quarry"
+next_level = ""
+level_width = 7900
+level_height = 768
+ground_y = 635
+spawn_point = Vector2(100, 595)
+ground_surface = "stone"
+sunset_seconds = 640
+start_progress = 0.3
+
+[node name="Effects" type="Node" parent="."]
+
+[node name="WeatherController" type="Node" parent="Effects"]
+script = ExtResource("2")
+storm = 1.6
+wind_strength = 1.25
+
+[node name="Sky" type="CanvasLayer" parent="Effects"]
+script = ExtResource("3")
+sun_screen_position = Vector2(700, 650)
+cloud_cover = 0.3
+
+[node name="Lightning" type="CanvasLayer" parent="Effects"]
+script = ExtResource("4")
+
+[node name="DistantScenery" type="Node2D" parent="Effects"]
+script = ExtResource("5")
+setting = 2
+
+[node name="FarRain" type="Node2D" parent="Effects"]
+script = ExtResource("6")
+depth_max = 0.45
+drops_per_storm = 26000
+max_drops = 52000
+z_index = -50
+
+[node name="FogBank" type="Node2D" parent="Effects"]
+script = ExtResource("7")
+density = 0.4
+parallax = 0.6
+z_index = -45
+
+[node name="GroundFog" type="Node2D" parent="Effects"]
+script = ExtResource("7")
+mode = 1
+density = 0.3
+parallax = 1
+z_index = 15
+
+[node name="NearRain" type="Node2D" parent="Effects"]
+script = ExtResource("6")
+depth_min = 0.45
+depth_max = 1
+drops_per_storm = 7000
+max_drops = 14000
+z_index = 40
+
+[node name="RainSplashes" type="Node2D" parent="Effects"]
+script = ExtResource("8")
+
+[node name="LeafStorm" type="Node2D" parent="Effects"]
+script = ExtResource("9")
+density = 1.6
+
+[node name="WetGround" type="CanvasLayer" parent="Effects"]
+script = ExtResource("10")
+
+[node name="LightShafts" type="CanvasLayer" parent="Effects"]
+script = ExtResource("11")
+strength = 0.3
+
+[node name="CameraLens" type="CanvasLayer" parent="Effects"]
+script = ExtResource("12")
+
+[node name="Ambience" type="Node" parent="Effects"]
+script = ExtResource("13")
+crickets = false
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="RimAndBasin" type="StaticBody2D" parent="World"]
+script = ExtResource("14")
+bottom = 950
+detail_seed = 2
+grass = true
+grass_height = 0.6
+surface = "stone"
+points = PackedVector2Array(-20, 600, 180, 598, 380, 604, 560, 600, 720, 604, 740, 620, 748, 655, 760, 700, 1000, 702, 1300, 700, 1600, 702, 1622, 690, 1648, 640, 1662, 604, 1768, 600, 1769, 640, 1772, 700, 1776, 800)
+
+[node name="Pine" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(120, 598)
+height = 280
+tree_seed = 3
+ragged = 0.3
+z_index = -30
+
+[node name="Pine2" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(300, 601)
+height = 220
+tree_seed = 5
+ragged = 0.3
+z_index = -30
+
+[node name="Pine3" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(640, 601)
+height = 300
+tree_seed = 8
+ragged = 0.5
+z_index = -30
+
+[node name="Rock0" type="StaticBody2D" parent="World"]
+script = ExtResource("16")
+position = Vector2(470, 602)
+size = Vector2(50, 28)
+rock_seed = 11
+
+[node name="Step" type="StaticBody2D" parent="World"]
+script = ExtResource("16")
+position = Vector2(792, 702)
+size = Vector2(70, 46)
+rock_seed = 5
+
+[node name="RockA" type="Node2D" parent="World"]
+script = ExtResource("17")
+position = Vector2(1000, 702)
+size = Vector2(170, 116)
+rock_seed = 3
+
+[node name="Hut" type="Node2D" parent="World"]
+script = ExtResource("18")
+position = Vector2(1180, 702)
+size = Vector2(170, 150)
+crumble = 0.4
+windows = 1
+wall_seed = 13
+
+[node name="RockB" type="Node2D" parent="World"]
+script = ExtResource("17")
+position = Vector2(1440, 702)
+size = Vector2(150, 108)
+rock_seed = 8
+shrub = false
+
+[node name="Hound1" type="CharacterBody2D" parent="World"]
+script = ExtResource("19")
+position = Vector2(1230, 700)
+patrol_left = 260
+patrol_right = 270
+start_facing = -1
+pause_time = 1.4
+
+[node name="Puddle1" type="Node2D" parent="World"]
+script = ExtResource("20")
+position = Vector2(1300, 701)
+half_width = 50
+
+[node name="CP1" type="Area2D" parent="World"]
+script = ExtResource("21")
+position = Vector2(1680, 380)
+size = Vector2(40, 230)
+
+[node name="Gantry" type="StaticBody2D" parent="World"]
+script = ExtResource("22")
+position = Vector2(1700, 250)
+length = 700
+depth = 34
+columns = PackedFloat32Array(10, 690)
+column_height = 360
+
+[node name="Pallet" type="AnimatableBody2D" parent="World"]
+script = ExtResource("23")
+position = Vector2(1771, 600)
+size = Vector2(96, 12)
+travel = Vector2(466, 0)
+mode = 1
+speed = 55
+pause = 2.5
+style = 2
+hang_height = 320
+
+[node name="PitWater" type="Node2D" parent="World"]
+script = ExtResource("24")
+position = Vector2(1772, 662)
+size = Vector2(562, 140)
+
+[node name="PitBed" type="StaticBody2D" parent="World"]
+script = ExtResource("14")
+bottom = 950
+detail_seed = 1
+grass = false
+grass_height = 0.6
+surface = "stone"
+points = PackedVector2Array(1770, 800, 2050, 806, 2336, 800)
+
+[node name="FarRim" type="StaticBody2D" parent="World"]
+script = ExtResource("14")
+bottom = 950
+detail_seed = 4
+grass = true
+grass_height = 0.6
+surface = "stone"
+points = PackedVector2Array(2333, 800, 2334, 700, 2335, 640, 2336, 600, 2480, 600, 2560, 600, 2600, 604, 2610, 640, 2614, 700, 2616, 950)
+
+[node name="Reeds" type="Node2D" parent="World"]
+script = ExtResource("25")
+position = Vector2(2345, 602)
+width = 60
+height = 50
+reed_seed = 4
+z_index = 5
+
+[node name="Pine4" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(2450, 600)
+height = 260
+tree_seed = 12
+ragged = 0.4
+z_index = -30
+
+[node name="CP2" type="Area2D" parent="World"]
+script = ExtResource("21")
+position = Vector2(2500, 380)
+size = Vector2(40, 230)
+
+[node name="RopeBridge" type="StaticBody2D" parent="World"]
+script = ExtResource("26")
+position = Vector2(2600, 604)
+end = Vector2(470, -2)
+sag = 30
+plank_width = 13
+collapses = false
+rotten = PackedInt32Array(5, 6, 12, 13, 14, 21, 22)
+missing = PackedInt32Array(9, 10)
+hold_time = 0.35
+
+[node name="Chasm1" type="Node2D" parent="World"]
+script = ExtResource("27")
+position = Vector2(2616, 606)
+size = Vector2(446, 140)
+chasm_seed = 12
+
+[node name="Chasm1Kill" type="Area2D" parent="World"]
+script = ExtResource("28")
+position = Vector2(2616, 850)
+size = Vector2(446, 80)
+cause = "fell"
+
+[node name="Ledge" type="StaticBody2D" parent="World"]
+script = ExtResource("14")
+bottom = 950
+detail_seed = 6
+grass = true
+grass_height = 0.6
+surface = "stone"
+points = PackedVector2Array(3058, 950, 3062, 700, 3070, 640, 3080, 604, 3300, 600, 3340, 620, 3360, 635, 3700, 635, 3702, 700, 3704, 820)
+
+[node name="Pine5" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(3150, 603)
+height = 240
+tree_seed = 21
+ragged = 0.6
+z_index = -30
+
+[node name="Pine6" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(3250, 601)
+height = 300
+tree_seed = 22
+ragged = 0.3
+z_index = -30
+
+[node name="PumpHouse" type="Node2D" parent="World"]
+script = ExtResource("18")
+position = Vector2(3380, 635)
+size = Vector2(300, 208)
+crumble = 0.15
+windows = 2
+wall_seed = 17
+
+[node name="PumpRoof" type="StaticBody2D" parent="World"]
+script = ExtResource("14")
+grass = false
+edge_detail = false
+bottom = 432
+surface = "metal"
+points = PackedVector2Array(3360, 420, 3460, 380, 3560, 380, 3600, 395)
+
+[node name="Pump" type="Node2D" parent="World"]
+script = ExtResource("29")
+position = Vector2(3600, 635)
+path = PackedVector2Array(0, 0, 0, -120, 60, -120, 60, -40)
+thickness = 12
+
+[node name="HatchLever" type="Node2D" parent="World"]
+script = ExtResource("30")
+position = Vector2(3655, 635)
+targets = Array[NodePath]([NodePath("../Hatch")])
+
+[node name="Hatch" type="Node2D" parent="World"]
+script = ExtResource("31")
+position = Vector2(3702, 628)
+size = Vector2(90, 10)
+direction = 3
+style = 0
+open = true
+inverted = true
+speed = 38
+travel = 86
+noise_radius = 700
+
+[node name="Shaft" type="Node2D" parent="World"]
+script = ExtResource("24")
+position = Vector2(3704, 712)
+size = Vector2(86, 100)
+
+[node name="ShaftFloor" type="StaticBody2D" parent="World"]
+script = ExtResource("14")
+bottom = 950
+detail_seed = 1
+grass = false
+grass_height = 0.6
+surface = "stone"
+points = PackedVector2Array(3700, 815, 3792, 815)
+
+[node name="Yard" type="StaticBody2D" parent="World"]
+script = ExtResource("14")
+bottom = 950
+detail_seed = 8
+grass = true
+grass_height = 0.6
+surface = "stone"
+points = PackedVector2Array(3788, 820, 3790, 700, 3792, 635, 4420, 635, 4440, 620, 4460, 600, 4650, 598, 4690, 604, 4700, 640, 4704, 700, 4706, 950)
+
+[node name="RockC" type="Node2D" parent="World"]
+script = ExtResource("17")
+position = Vector2(4040, 635)
+size = Vector2(150, 100)
+rock_seed = 12
+
+[node name="Boiler" type="Node2D" parent="World"]
+script = ExtResource("32")
+position = Vector2(4270, 635)
+length = 190
+leaks_steam = true
+
+[node name="Hound2" type="CharacterBody2D" parent="World"]
+script = ExtResource("19")
+position = Vector2(4100, 633)
+patrol_left = 230
+patrol_right = 280
+start_facing = 1
+pause_time = 1.8
+
+[node name="Lantern" type="Node2D" parent="World"]
+script = ExtResource("33")
+position = Vector2(3520, 455)
+drop = 40
+light_radius = 70
+dies_at = 0.85
+
+[node name="CP3" type="Area2D" parent="World"]
+script = ExtResource("21")
+position = Vector2(4480, 360)
+size = Vector2(40, 240)
+
+[node name="Plate" type="Area2D" parent="World"]
+script = ExtResource("34")
+position = Vector2(4620, 598)
+targets = Array[NodePath]([NodePath("../BridgeTree")])
+width = 40
+iron = false
+latches = true
+
+[node name="BridgeTree" type="Node2D" parent="World"]
+script = ExtResource("35")
+position = Vector2(4935, 602)
+height = 275
+trunk_width = 22
+fall_direction = -1
+fall_angle = 86
+trigger = 2
+tree_seed = 17
+
+[node name="Gully" type="Node2D" parent="World"]
+script = ExtResource("27")
+position = Vector2(4706, 606)
+size = Vector2(198, 140)
+chasm_seed = 25
+
+[node name="GullyKill" type="Area2D" parent="World"]
+script = ExtResource("28")
+position = Vector2(4706, 850)
+size = Vector2(198, 80)
+cause = "fell"
+
+[node name="Forest" type="StaticBody2D" parent="World"]
+script = ExtResource("14")
+bottom = 950
+detail_seed = 10
+grass = true
+grass_height = 0.6
+surface = "stone"
+points = PackedVector2Array(4902, 950, 4904, 700, 4910, 640, 4920, 602, 5200, 598, 5400, 604, 5600, 600, 5787, 600, 5788, 640, 5789, 700, 5790, 950)
+
+[node name="Pine7" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(4560, 598)
+height = 250
+tree_seed = 30
+ragged = 0.5
+z_index = -30
+
+[node name="Pine8" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(5000, 600)
+height = 290
+tree_seed = 31
+ragged = 0.3
+z_index = -30
+
+[node name="Pine9" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(5120, 598)
+height = 230
+tree_seed = 32
+ragged = 0.4
+z_index = -30
+
+[node name="TrapTree" type="Node2D" parent="World"]
+script = ExtResource("35")
+position = Vector2(5330, 600)
+height = 235
+trunk_width = 20
+fall_direction = -1
+fall_angle = 86
+trigger = 1
+trigger_distance = 105
+warning_time = 0.6
+tree_seed = 19
+
+[node name="RockD" type="Node2D" parent="World"]
+script = ExtResource("17")
+position = Vector2(5480, 602)
+size = Vector2(130, 96)
+rock_seed = 14
+
+[node name="DeadOak" type="Node2D" parent="World"]
+script = ExtResource("36")
+position = Vector2(5660, 601)
+size = 0.9
+tree_seed = 21
+leafless = true
+
+[node name="Hound3" type="CharacterBody2D" parent="World"]
+script = ExtResource("19")
+position = Vector2(5560, 600)
+patrol_left = 140
+patrol_right = 150
+start_facing = -1
+pause_time = 2
+
+[node name="CP4" type="Area2D" parent="World"]
+script = ExtResource("21")
+position = Vector2(5730, 360)
+size = Vector2(30, 240)
+
+[node name="CarLever" type="Node2D" parent="World"]
+script = ExtResource("30")
+position = Vector2(5745, 602)
+targets = Array[NodePath]([NodePath("../Car")])
+
+[node name="Car" type="AnimatableBody2D" parent="World"]
+script = ExtResource("23")
+position = Vector2(5791, 600)
+size = Vector2(96, 12)
+travel = Vector2(441, 0)
+mode = 0
+speed = 48
+style = 2
+hang_height = 300
+
+[node name="Mast1" type="StaticBody2D" parent="World"]
+script = ExtResource("22")
+position = Vector2(5730, 292)
+length = 600
+depth = 30
+columns = PackedFloat32Array(12, 588)
+column_height = 310
+
+[node name="Abyss" type="Node2D" parent="World"]
+script = ExtResource("27")
+position = Vector2(5790, 606)
+size = Vector2(540, 160)
+chasm_seed = 24
+
+[node name="AbyssKill" type="Area2D" parent="World"]
+script = ExtResource("28")
+position = Vector2(5790, 850)
+size = Vector2(540, 80)
+cause = "fell"
+
+[node name="Ascent" type="StaticBody2D" parent="World"]
+script = ExtResource("14")
+bottom = 950
+detail_seed = 12
+grass = true
+grass_height = 0.6
+surface = "stone"
+points = PackedVector2Array(6329, 950, 6330, 700, 6331, 640, 6332, 600, 6560, 598, 6575, 560, 6590, 522, 6800, 520, 6815, 480, 6830, 442, 7050, 440, 7065, 410, 7080, 382, 7400, 376, 7920, 370)
+
+[node name="Pine10" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(6450, 600)
+height = 270
+tree_seed = 40
+ragged = 0.3
+z_index = -30
+
+[node name="Pine11" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(6700, 521)
+height = 230
+tree_seed = 41
+ragged = 0.6
+z_index = -30
+
+[node name="Pine12" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(6950, 441)
+height = 260
+tree_seed = 42
+ragged = 0.3
+z_index = -30
+
+[node name="CP5" type="Area2D" parent="World"]
+script = ExtResource("21")
+position = Vector2(6860, 200)
+size = Vector2(30, 240)
+
+[node name="HillOak" type="Node2D" parent="World"]
+script = ExtResource("36")
+position = Vector2(7230, 379)
+size = 1.05
+tree_seed = 33
+leafless = true
+
+[node name="Chapel" type="Node2D" parent="World"]
+script = ExtResource("18")
+position = Vector2(7420, 377)
+size = Vector2(190, 175)
+crumble = 0.5
+windows = 2
+wall_seed = 23
+
+[node name="Stalker" type="CharacterBody2D" parent="World"]
+script = ExtResource("37")
+position = Vector2(7380, 377)
+patrol_left = 230
+patrol_right = 260
+start_facing = -1
+sight_range = 330
+
+[node name="Exit" type="Area2D" parent="World"]
+script = ExtResource("38")
+position = Vector2(7760, 100)
+size = Vector2(140, 300)
+
+[node name="Creatures" type="Node2D" parent="."]
+
+[node name="Bag" type="Node2D" parent="Creatures"]
+script = ExtResource("39")
+position = Vector2(4000, 631)
+
+[node name="Player" parent="." instance=ExtResource("40")]
+
+[node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+script = ExtResource("41")
+target = NodePath("../Player")
+
+[node name="Foreground" type="Parallax2D" parent="."]
+scroll_scale = Vector2(1.25, 1)
+z_index = 30
+
+[node name="Reeds" type="Node2D" parent="Foreground"]
+script = ExtResource("42")
+position = Vector2(0, 635)
+width = 10270
+spacing_min = 2.5
+spacing_max = 9
+height_min = 150
+height_max = 290
+tall_chance = 0
+blade_width = 3.2
+clustered = true
+base_depth = 155
+grass_seed = 4
+wind_response = 0.3
+player_pushes = false
+
+[node name="DebugOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("43")

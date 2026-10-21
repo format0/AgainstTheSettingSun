@@ -19,7 +19,7 @@ func _process(_delta: float) -> void:
 	material.set_shader_parameter("weather_time", Weather.time)
 	material.set_shader_parameter("cam_x", view.position.x)
 	material.set_shader_parameter("storm", Weather.storm)
-	material.set_shader_parameter("sheen", sheen)
+	material.set_shader_parameter("sheen", sheen * (0.3 + 0.7 * Daylight.light()))
 	var data: Array[Vector4] = []
 	for node in get_tree().get_nodes_in_group("puddles"):
 		var p := node as Puddle

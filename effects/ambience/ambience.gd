@@ -2,18 +2,29 @@
 class_name Ambience
 extends Node
 ## Background sound: rain hiss and rumble that follow the storm, gusting wind,
-## and thunder after lightning (closer strikes are louder, crack, and arrive sooner).
+## thunder after lightning (closer strikes are louder, crack, and arrive sooner), a quiet
+## pad of music, crickets as the light goes, and a heartbeat when something hunts you
+## or the darkness is close.
 
 @export_range(-40.0, 6.0) var volume_db := 0.0
 @export var rain := true
 @export var wind := true
 @export var thunder := true
+@export var music := true
+@export_range(-40.0, 0.0) var music_db := -15.0
+## Crickets start as the sun goes down (nature levels).
+@export var crickets := false
 
 var _hiss: AudioStreamPlayer
 var _rumble: AudioStreamPlayer
 var _wind: AudioStreamPlayer
 var _wind_filter: AudioEffectBandPassFilter
 var _wind_bus := -1
+var _music: AudioStreamPlayer
+var _crickets: AudioStreamPlayer
+var _heart: AudioStreamPlayer
+var _music_task := -1
+var _music_built: AudioStreamWAV
 
 
 func _ready() -> void:
@@ -35,6 +46,29 @@ func _ready() -> void:
 		else:
 			_wind_filter = AudioServer.get_bus_effect(_wind_bus, 0) as AudioEffectBandPassFilter
 		_wind = _loop(SoundBank.wind_noise(), "Wind")
+	if crickets:
+		_crickets = _loop(SoundBank.crickets(), "Master")
+	_heart = _loop(SoundBank.heartbeat(), "Master")
+	if music:
+		if SoundBank.music_pad():
+			_start_music()
+		else:
+			_music_task = WorkerThreadPool.add_task(_build_music)
+
+
+func _exit_tree() -> void:
+	if _music_task >= 0:
+		WorkerThreadPool.wait_for_task_completion(_music_task)
+		_music_task = -1
+		SoundBank.store_music_pad(_music_built)
+
+
+func _build_music() -> void:
+	_music_built = SoundBank.build_music_pad()
+
+
+func _start_music() -> void:
+	_music = _loop(SoundBank.music_pad(), "Master")
 
 
 func _loop(stream: AudioStream, bus: String) -> AudioStreamPlayer:
@@ -53,6 +87,22 @@ func _process(delta: float) -> void:
 	if _hiss:
 		_fade(_hiss, 0.30 * s, smooth)
 		_fade(_rumble, 0.55 * minf(s, 1.6), smooth)
+	if _music_task >= 0 and WorkerThreadPool.is_task_completed(_music_task):
+		WorkerThreadPool.wait_for_task_completion(_music_task)
+		_music_task = -1
+		SoundBank.store_music_pad(_music_built)
+		_start_music()
+	if _music:
+		_fade(_music, db_to_linear(music_db) * (0.6 + 0.4 * Daylight.light()), 1.0 - exp(-delta * 0.3))
+	if _crickets:
+		_fade(_crickets, 0.5 * smoothstep(0.35, 0.8, Daylight.progress) * (1.0 - 0.6 * minf(s, 1.0)), smooth)
+	var hunted := false
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if e.state == Enemy.State.CHASE or e.state == Enemy.State.ALERT:
+			hunted = true
+			break
+	_fade(_heart, maxf(0.45 if hunted else 0.0, Daylight.urgency() * 0.6), 1.0 - exp(-delta * 3.0))
+	_heart.pitch_scale = lerpf(_heart.pitch_scale, 1.35 if hunted else 1.0 + Daylight.urgency() * 0.3, delta)
 	if _wind:
 		_fade(_wind, 0.35 * Weather.wind * Weather.gust * (0.5 + 0.5 * s), 1.0 - exp(-delta * 4.0))
 		if _wind_filter:

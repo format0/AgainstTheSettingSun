@@ -60,6 +60,11 @@ func _publish() -> void:
 	view_rect = Rect2(global_position + offset, get_viewport_rect().size)
 
 
+## Shake the view (called through the "game_camera" group by heavy impacts).
+func shake(amount: float) -> void:
+	_shake = maxf(_shake, amount)
+
+
 ## Called through the "lightning_listeners" group.
 func on_lightning(_screen_x: float, strength: float) -> void:
 	_shake = maxf(_shake, max_shake * strength)
