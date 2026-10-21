@@ -167,6 +167,30 @@ Level: `get_tree().call_group("dust_emitters", "burst", position, count, width)`
 
 ---
 
+## Editing levels in Godot
+
+The **Level Tools** plugin (`addons/level_tools`, enabled in the project) makes the 2D view a
+place to design levels in:
+
+- **The level as it looks in the game.** Behind an open level the editor shows its sky (the
+  same shader, with the level's sun, clouds and time of day) and both layers of distant
+  scenery, placed as the game camera would see them from where you are looking. Toggle it
+  with **Sky** in the 2D toolbar. It is drawn only in the editor and never saved.
+- **Click anything to select it.** Trees, walls, machinery, creatures: click it in the view
+  (Shift adds to the selection) and drag to move it (Shift snaps to 8 px). One undo step per
+  move. Rotate and scale with the usual tools or the Inspector; every size and shape setting
+  of an element is in the Inspector.
+- **Shape the ground.** Select a `Terrain` (or a `Roof`): drag its points, click the small dot
+  between two points to add one, right-click a point to remove it. Grass, stones, roots and
+  collision follow at once. Everything can be undone.
+- **Move the spawn point.** Select the level's root and drag the blue spawn handle; the Player
+  moves with it.
+- **Collision** in the 2D toolbar shows the collision shapes the elements build for
+  themselves (hidden by default, as they would cover the artwork).
+
+While editing, nothing runs: no physics, no creatures walking, no wind animation. Elements are
+drawn once in their resting pose and redrawn only when you change them.
+
 ## Making a new level
 
 `levels/gallery/gallery.tscn` puts the trees, buildings, roofs, rocks, machinery and props side

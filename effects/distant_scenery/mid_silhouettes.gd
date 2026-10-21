@@ -1,3 +1,4 @@
+@tool
 class_name MidSilhouettes
 extends Node2D
 ## Middle layer: closer and darker than the far one. Rows of poplars and a barn in the
@@ -25,7 +26,8 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	queue_redraw()
+	if not Engine.is_editor_hint():
+		queue_redraw()
 
 
 func _draw() -> void:

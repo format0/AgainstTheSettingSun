@@ -23,6 +23,10 @@ window/size/viewport_height=768
 window/stretch/mode="canvas_items"
 window/stretch/aspect="keep"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/level_tools/plugin.cfg")
+
 [input]
 
 move_left={

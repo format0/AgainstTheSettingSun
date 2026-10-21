@@ -1,3 +1,4 @@
+@tool
 class_name RunnerAnimator
 extends Sprite2D
 ## Plays the 16-frame run cycle from player/runner_sheet.png.
@@ -28,6 +29,8 @@ func _ready() -> void:
 	var fw := texture.get_width() / hframes
 	offset = Vector2(-anchor_x * fw, -feet_y * texture.get_height())
 	scale = Vector2(draw_scale, draw_scale)
+	if Engine.is_editor_hint():
+		frame = idle_frame   # the editor shows him standing, not the whole sheet
 
 
 func face(direction: int) -> void:

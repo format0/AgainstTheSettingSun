@@ -294,6 +294,7 @@ starts_at = 0
 ends_at = 1
 
 [node name="Player" parent="." instance=ExtResource("34")]
+position = Vector2(60, 630)
 
 [node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
 script = ExtResource("35")

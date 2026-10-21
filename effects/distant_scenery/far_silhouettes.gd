@@ -1,3 +1,4 @@
+@tool
 class_name FarSilhouettes
 extends Node2D
 ## Far layer. Everything is drawn in one opaque haze colour and the DistantScenery fades the
@@ -42,6 +43,8 @@ func _stacks() -> Array[Vector2]:
 
 
 func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return   # in the editor preview it holds still and is redrawn only when the view moves
 	_mill_angle += (0.25 + Weather.wind * 0.9) * delta
 	_turbine_angle += (0.5 + Weather.wind) * 0.9 * delta
 	var industry := setting == DistantScenery.Setting.INDUSTRY

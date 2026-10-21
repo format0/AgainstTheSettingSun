@@ -685,6 +685,7 @@ position = Vector2(3430, 635)
 territory = 110
 
 [node name="Player" parent="." instance=ExtResource("48")]
+position = Vector2(100, 595)
 
 [node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
 script = ExtResource("49")
