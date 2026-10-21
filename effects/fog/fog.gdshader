@@ -13,6 +13,7 @@ uniform float ground_y = 635.0;   // screen pixels
 uniform float flash = 0.0;
 uniform vec2 sun_pos = vec2(560.0, 622.0);
 uniform vec3 lamps[6];
+uniform float light = 1.0;
 
 float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); vec2 u = f*f*(3.-2.*f);
@@ -34,6 +35,7 @@ void fragment() {
 		float n2 = fbm(vec2(wx * .0090 + wind_acc * 1.1, L.y * .024 + weather_time * .05), 3);
 		float dens = prof * smoothstep(.30, .85, n * .75 + n2 * .45) * density;
 		vec3 col = mix(vec3(.20, .085, .065), vec3(.78, .38, .17), exp(-length(L - sun_pos) / 480.)) * (mode < 0.5 ? 1.0 : 0.55);
+		col = mix(vec3(.025, .025, .045), col, light);
 		vec3 lamp = vec3(0.0);
 		for (int i = 0; i < 6; i++) {
 			vec2 d = L - lamps[i].xy;

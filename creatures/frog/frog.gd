@@ -49,7 +49,7 @@ func _process(delta: float) -> void:
 			position.y = _ground_y
 			_in_air = false
 			_wait = randf_range(hop_interval.x, hop_interval.y)
-			get_tree().call_group("splash_emitters", "burst", global_position, 5 if Puddle.is_wet_at(global_position.x) else 3, 0.8)
+			get_tree().call_group("splash_emitters", "burst", global_position, 5 if Puddle.is_wet_at(global_position) else 3, 0.8)
 		queue_redraw()
 		return
 	_croak -= delta

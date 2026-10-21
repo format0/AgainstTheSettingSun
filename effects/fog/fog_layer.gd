@@ -31,7 +31,9 @@ func _process(_delta: float) -> void:
 	global_position = view.position
 	_rect.size = view.size
 	var ground := Level.current.ground_y if Level.current else 635.0
-	var amount := density * (0.7 + 0.45 * minf(Weather.storm, 1.6))
+	var amount := density * (0.7 + 0.45 * minf(Weather.storm, 1.6)) * VFX.v("fog" if mode == Mode.BANK else "ground_fog")
+	# as the air cools after sunset, mist rises from the ground
+	amount *= 1.0 + VFX.v("evening_mist") * smoothstep(0.35, 0.85, Daylight.progress) * (0.9 if mode == Mode.GROUND else 0.35)
 	_mat.set_shader_parameter("view_size", view.size)
 	_mat.set_shader_parameter("mode", float(mode))
 	_mat.set_shader_parameter("density", amount)
@@ -42,6 +44,7 @@ func _process(_delta: float) -> void:
 	_mat.set_shader_parameter("ground_y", ground - view.position.y)
 	_mat.set_shader_parameter("flash", Weather.flash)
 	_mat.set_shader_parameter("sun_pos", Weather.sun_screen_pos)
+	_mat.set_shader_parameter("light", Daylight.light())
 	var lamps := PackedVector3Array()
 	for p in StreetLamp.lights_near(view):
 		lamps.append(Vector3(p.x - view.position.x, p.y - view.position.y, p.z))

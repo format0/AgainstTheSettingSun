@@ -1,412 +1,700 @@
-[gd_scene format=3]
+[gd_scene load_steps=57 format=3]
 
-[ext_resource type="Script" path="res://levels/level.gd" id="level"]
-[ext_resource type="Script" path="res://effects/weather/weather_controller.gd" id="weather"]
-[ext_resource type="Script" path="res://effects/sky/sky.gd" id="sky"]
-[ext_resource type="Script" path="res://effects/lightning/lightning.gd" id="lightning"]
-[ext_resource type="Script" path="res://effects/distant_scenery/distant_scenery.gd" id="distant"]
-[ext_resource type="Script" path="res://effects/rain/rain_layer.gd" id="rain"]
-[ext_resource type="Script" path="res://effects/fog/fog_layer.gd" id="fog"]
-[ext_resource type="Script" path="res://effects/rain/rain_splashes.gd" id="splashes"]
-[ext_resource type="Script" path="res://effects/post/wet_ground.gd" id="wet"]
-[ext_resource type="Script" path="res://effects/post/light_shafts.gd" id="shafts"]
-[ext_resource type="Script" path="res://effects/post/camera_lens.gd" id="lens"]
-[ext_resource type="Script" path="res://effects/ambience/ambience.gd" id="ambience"]
-[ext_resource type="Texture2D" path="res://assets/level_01/backdrop.png" id="backdrop_tex"]
-[ext_resource type="Texture2D" path="res://assets/level_01/hanging_beams.png" id="beams_tex"]
-[ext_resource type="Script" path="res://elements/solid_block/solid_block.gd" id="block"]
-[ext_resource type="Script" path="res://elements/swinging_beam/swinging_beam.gd" id="swing"]
-[ext_resource type="Script" path="res://elements/street_lamp/street_lamp.gd" id="lamp"]
-[ext_resource type="Script" path="res://elements/cloth_flag/cloth_flag.gd" id="flag"]
-[ext_resource type="Script" path="res://elements/power_line/power_line.gd" id="power"]
-[ext_resource type="Script" path="res://elements/wind_tree/wind_tree.gd" id="tree"]
-[ext_resource type="Script" path="res://elements/windmill/windmill.gd" id="windmill"]
-[ext_resource type="Script" path="res://elements/grass_field/grass_field.gd" id="grass"]
-[ext_resource type="Script" path="res://elements/puddle/puddle.gd" id="puddle"]
-[ext_resource type="Script" path="res://creatures/frog/frog.gd" id="frog"]
-[ext_resource type="Script" path="res://creatures/crow/crow.gd" id="crow"]
-[ext_resource type="Script" path="res://creatures/plastic_bag/plastic_bag.gd" id="bag"]
-[ext_resource type="PackedScene" path="res://player/player.tscn" id="player"]
-[ext_resource type="Script" path="res://core/game_camera.gd" id="camera"]
-[ext_resource type="Script" path="res://ui/debug_overlay.gd" id="overlay"]
+[ext_resource type="Script" path="res://levels/level.gd" id="1"]
+[ext_resource type="Script" path="res://effects/weather/weather_controller.gd" id="2"]
+[ext_resource type="Script" path="res://effects/sky/sky.gd" id="3"]
+[ext_resource type="Script" path="res://effects/distant_scenery/distant_scenery.gd" id="4"]
+[ext_resource type="Script" path="res://effects/rain/rain_layer.gd" id="5"]
+[ext_resource type="Script" path="res://effects/fog/fog_layer.gd" id="6"]
+[ext_resource type="Script" path="res://effects/rain/rain_splashes.gd" id="7"]
+[ext_resource type="Script" path="res://effects/leaves/leaf_storm.gd" id="8"]
+[ext_resource type="Script" path="res://effects/post/wet_ground.gd" id="9"]
+[ext_resource type="Script" path="res://effects/post/light_shafts.gd" id="10"]
+[ext_resource type="Script" path="res://effects/post/camera_lens.gd" id="11"]
+[ext_resource type="Script" path="res://effects/ambience/ambience.gd" id="12"]
+[ext_resource type="Script" path="res://structures/terrain/terrain.gd" id="13"]
+[ext_resource type="Script" path="res://environment/power_line/power_line.gd" id="14"]
+[ext_resource type="Script" path="res://environment/wooden_fence/wooden_fence.gd" id="15"]
+[ext_resource type="Script" path="res://cover/old_oak/old_oak.gd" id="16"]
+[ext_resource type="Script" path="res://structures/car_wreck/car_wreck.gd" id="17"]
+[ext_resource type="Script" path="res://environment/bush/bush.gd" id="18"]
+[ext_resource type="Script" path="res://structures/tree_stump/tree_stump.gd" id="19"]
+[ext_resource type="Script" path="res://environment/puddle/puddle.gd" id="20"]
+[ext_resource type="Script" path="res://hazards/deep_water/deep_water.gd" id="21"]
+[ext_resource type="Script" path="res://interactive/falling_tree/falling_tree.gd" id="22"]
+[ext_resource type="Script" path="res://environment/cattails/cattails.gd" id="23"]
+[ext_resource type="Script" path="res://gameplay/checkpoint/checkpoint.gd" id="24"]
+[ext_resource type="Script" path="res://structures/boulder/boulder.gd" id="25"]
+[ext_resource type="Script" path="res://enemies/crawler/crawler.gd" id="26"]
+[ext_resource type="Script" path="res://environment/wind_tree/wind_tree.gd" id="27"]
+[ext_resource type="Script" path="res://cover/hay_bales/hay_bales.gd" id="28"]
+[ext_resource type="Script" path="res://cover/ruined_wall/ruined_wall.gd" id="29"]
+[ext_resource type="Script" path="res://enemies/stalker/stalker.gd" id="30"]
+[ext_resource type="Script" path="res://enemies/burrower/burrower.gd" id="31"]
+[ext_resource type="Script" path="res://interactive/collapsing_bridge/collapsing_bridge.gd" id="32"]
+[ext_resource type="Script" path="res://hazards/kill_zone/kill_zone.gd" id="33"]
+[ext_resource type="Script" path="res://environment/chasm/chasm.gd" id="34"]
+[ext_resource type="Script" path="res://interactive/push_crate/push_crate.gd" id="35"]
+[ext_resource type="Script" path="res://cover/rock_face/rock_face.gd" id="36"]
+[ext_resource type="Script" path="res://structures/crate_stack/crate_stack.gd" id="37"]
+[ext_resource type="Script" path="res://structures/solid_block/solid_block.gd" id="38"]
+[ext_resource type="Script" path="res://interactive/lever/lever.gd" id="39"]
+[ext_resource type="Script" path="res://structures/roof/roof.gd" id="40"]
+[ext_resource type="Script" path="res://interactive/sliding_gate/sliding_gate.gd" id="41"]
+[ext_resource type="Script" path="res://environment/lantern/lantern.gd" id="42"]
+[ext_resource type="Script" path="res://environment/street_lamp/street_lamp.gd" id="43"]
+[ext_resource type="Script" path="res://environment/windmill/windmill.gd" id="44"]
+[ext_resource type="Script" path="res://gameplay/level_exit/level_exit.gd" id="45"]
+[ext_resource type="Script" path="res://creatures/frog/frog.gd" id="46"]
+[ext_resource type="Script" path="res://creatures/crow/crow.gd" id="47"]
+[ext_resource type="Script" path="res://creatures/plastic_bag/plastic_bag.gd" id="48"]
+[ext_resource type="Script" path="res://creatures/starlings/starlings.gd" id="49"]
+[ext_resource type="Script" path="res://creatures/bats/bats.gd" id="50"]
+[ext_resource type="Script" path="res://creatures/fireflies/fireflies.gd" id="51"]
+[ext_resource type="Script" path="res://creatures/cat/stray_cat.gd" id="52"]
+[ext_resource type="Script" path="res://creatures/fish/jumping_fish.gd" id="53"]
+[ext_resource type="PackedScene" path="res://player/player.tscn" id="54"]
+[ext_resource type="Script" path="res://core/game_camera.gd" id="55"]
+[ext_resource type="Script" path="res://environment/grass_field/grass_field.gd" id="56"]
 
 [node name="Level01" type="Node2D"]
-script = ExtResource("level")
-spawn_point = Vector2(300, 600)
+script = ExtResource("1")
+level_title = "I"
+level_subtitle = "The Fields"
+next_level = "res://levels/level_02/level_02.tscn"
+level_width = 7400
+level_height = 768
+ground_y = 635
+spawn_point = Vector2(140, 630)
+ground_surface = "grass"
+sunset_seconds = 420
 
 [node name="Effects" type="Node" parent="."]
 
 [node name="WeatherController" type="Node" parent="Effects"]
-script = ExtResource("weather")
-storm = 1.0
+script = ExtResource("2")
+storm = 0.42
+wind_strength = 0.85
 
 [node name="Sky" type="CanvasLayer" parent="Effects"]
-script = ExtResource("sky")
-sun_screen_position = Vector2(455, 618)
-
-[node name="Lightning" type="CanvasLayer" parent="Effects"]
-script = ExtResource("lightning")
+script = ExtResource("3")
+sun_screen_position = Vector2(520, 600)
+cloud_cover = 0.45
 
 [node name="DistantScenery" type="Node2D" parent="Effects"]
-script = ExtResource("distant")
+script = ExtResource("4")
+setting = 0
 
 [node name="FarRain" type="Node2D" parent="Effects"]
-z_index = -50
-script = ExtResource("rain")
+script = ExtResource("5")
 depth_max = 0.45
-drops_per_storm = 23000
-max_drops = 46000
+drops_per_storm = 16000
+max_drops = 32000
+z_index = -50
 
 [node name="FogBank" type="Node2D" parent="Effects"]
-z_index = -45
-script = ExtResource("fog")
-density = 0.3
+script = ExtResource("6")
+density = 0.32
 parallax = 0.6
+z_index = -45
 
 [node name="GroundFog" type="Node2D" parent="Effects"]
-z_index = 15
-script = ExtResource("fog")
+script = ExtResource("6")
 mode = 1
-density = 0.26
-parallax = 1.0
+density = 0.3
+parallax = 1
+z_index = 15
 
 [node name="NearRain" type="Node2D" parent="Effects"]
-z_index = 40
-script = ExtResource("rain")
+script = ExtResource("5")
 depth_min = 0.45
-depth_max = 1.0
-drops_per_storm = 5500
-max_drops = 11000
+depth_max = 1
+drops_per_storm = 4000
+max_drops = 8000
+z_index = 40
 
 [node name="RainSplashes" type="Node2D" parent="Effects"]
-script = ExtResource("splashes")
+script = ExtResource("7")
+
+[node name="LeafStorm" type="Node2D" parent="Effects"]
+script = ExtResource("8")
+density = 1.2
 
 [node name="WetGround" type="CanvasLayer" parent="Effects"]
-script = ExtResource("wet")
+script = ExtResource("9")
 
 [node name="LightShafts" type="CanvasLayer" parent="Effects"]
-script = ExtResource("shafts")
+script = ExtResource("10")
+strength = 0.45
 
 [node name="CameraLens" type="CanvasLayer" parent="Effects"]
-script = ExtResource("lens")
+script = ExtResource("11")
 
 [node name="Ambience" type="Node" parent="Effects"]
-script = ExtResource("ambience")
+script = ExtResource("12")
+crickets = true
 
 [node name="World" type="Node2D" parent="."]
 
-[node name="Backdrop" type="Sprite2D" parent="World"]
-z_index = -40
-texture = ExtResource("backdrop_tex")
-centered = false
+[node name="Ground" type="Node2D" parent="World"]
 
-[node name="Collision" type="Node2D" parent="World"]
+[node name="Meadow" type="StaticBody2D" parent="World/Ground"]
+script = ExtResource("13")
+bottom = 900
+detail_seed = 1
+points = PackedVector2Array(-20, 634, 0, 635, 300, 632, 520, 628, 700, 636, 900, 634, 1000, 633, 1040, 636, 1066, 648, 1076, 700, 1080, 780)
 
-[node name="Ground" type="StaticBody2D" parent="World/Collision"]
-position = Vector2(0, 635)
-script = ExtResource("block")
-size = Vector2(3000, 133)
-visible_fill = false
+[node name="CreekBed" type="StaticBody2D" parent="World/Ground"]
+script = ExtResource("13")
+bottom = 900
+grass = false
+points = PackedVector2Array(1070, 772, 1200, 778, 1330, 772)
 
-[node name="CarBody" type="StaticBody2D" parent="World/Collision"]
-position = Vector2(118, 603)
-script = ExtResource("block")
-size = Vector2(117, 32)
-visible_fill = false
+[node name="FarBank" type="StaticBody2D" parent="World/Ground"]
+script = ExtResource("13")
+bottom = 900
+detail_seed = 3
+points = PackedVector2Array(1320, 780, 1324, 700, 1334, 652, 1348, 637, 1500, 634, 1640, 636, 1690, 652, 1720, 662, 1920, 664, 1950, 652, 1990, 636, 2200, 634, 2400, 630, 2600, 634, 2800, 632, 3000, 634, 3200, 630, 3420, 634, 3480, 637, 3488, 680, 3494, 780, 3496, 900)
 
-[node name="CarRoof" type="StaticBody2D" parent="World/Collision"]
-position = Vector2(141, 580)
-script = ExtResource("block")
-size = Vector2(59, 27)
-visible_fill = false
+[node name="Woods" type="StaticBody2D" parent="World/Ground"]
+script = ExtResource("13")
+bottom = 900
+detail_seed = 5
+points = PackedVector2Array(3880, 900, 3882, 780, 3888, 690, 3896, 640, 3920, 636, 4100, 634, 4300, 630, 4500, 634, 4700, 632, 4800, 636, 4834, 648, 4846, 700, 4850, 780)
 
-[node name="WaterTower" type="StaticBody2D" parent="World/Collision"]
-position = Vector2(356, 402)
-script = ExtResource("block")
-size = Vector2(58, 98)
-visible_fill = false
+[node name="PondBed" type="StaticBody2D" parent="World/Ground"]
+script = ExtResource("13")
+bottom = 900
+grass = false
+points = PackedVector2Array(4840, 790, 5050, 796, 5260, 790)
 
-[node name="Bin" type="StaticBody2D" parent="World/Collision"]
-position = Vector2(896, 601)
-script = ExtResource("block")
-size = Vector2(24, 39)
-visible_fill = false
-
-[node name="CraneBeam" type="StaticBody2D" parent="World/Collision"]
-position = Vector2(768, 528)
-script = ExtResource("block")
-size = Vector2(133, 18)
-visible_fill = false
-
-[node name="LeftBeam" type="StaticBody2D" parent="World/Collision"]
-position = Vector2(95, 322)
-script = ExtResource("block")
-size = Vector2(167, 24)
-visible_fill = false
-
-[node name="CratesBase" type="StaticBody2D" parent="World/Collision"]
-position = Vector2(496, 606)
-script = ExtResource("block")
-size = Vector2(160, 29)
-visible_fill = false
-
-[node name="Crates2" type="StaticBody2D" parent="World/Collision"]
-position = Vector2(516, 579)
-script = ExtResource("block")
-size = Vector2(128, 56)
-visible_fill = false
-
-[node name="Crates3" type="StaticBody2D" parent="World/Collision"]
-position = Vector2(528, 549)
-script = ExtResource("block")
-size = Vector2(60, 86)
-visible_fill = false
-
-[node name="CratesTop" type="StaticBody2D" parent="World/Collision"]
-position = Vector2(556, 537)
-script = ExtResource("block")
-size = Vector2(32, 98)
-visible_fill = false
-
-[node name="Crates4" type="StaticBody2D" parent="World/Collision"]
-position = Vector2(588, 561)
-script = ExtResource("block")
-size = Vector2(36, 74)
-visible_fill = false
-
-[node name="HangingBeams" type="AnimatableBody2D" parent="World"]
-z_index = -20
-position = Vector2(620, -320)
-script = ExtResource("swing")
-texture = ExtResource("beams_tex")
-beams = Array[Rect2]([Rect2(-122, 641, 168, 24), Rect2(-73, 526, 169, 25)])
-texture_offset = Vector2(-130, 320)
-
-[node name="LampLeft" type="Node2D" parent="World"]
-z_index = -20
-position = Vector2(63, 503)
-script = ExtResource("lamp")
-behaviour = 1
-draw_post = false
-post_height = 132.0
-
-[node name="LampMiddle" type="Node2D" parent="World"]
-z_index = -20
-position = Vector2(941, 503)
-script = ExtResource("lamp")
-behaviour = 0
-draw_post = false
-post_height = 132.0
-
-[node name="LampFar" type="Node2D" parent="World"]
-z_index = -20
-position = Vector2(2111, 503)
-script = ExtResource("lamp")
-behaviour = 2
-draw_post = false
-post_height = 132.0
-
-[node name="Flag" type="Node2D" parent="World"]
-z_index = -20
-position = Vector2(386, 389)
-script = ExtResource("flag")
+[node name="Farm" type="StaticBody2D" parent="World/Ground"]
+script = ExtResource("13")
+bottom = 900
+detail_seed = 7
+points = PackedVector2Array(5250, 790, 5254, 700, 5264, 652, 5278, 637, 5500, 632, 5700, 634, 5900, 630, 6200, 634, 6500, 632, 6800, 634, 7000, 616, 7200, 598, 7420, 594)
 
 [node name="PowerLine" type="Node2D" parent="World"]
+script = ExtResource("14")
+position = Vector2(60, 634)
+pole_x = PackedFloat32Array(0, 300, 600, 900)
+pole_height = 180
 z_index = -30
-position = Vector2(1470, 635)
-script = ExtResource("power")
-pole_height = 195.0
+
+[node name="Fence" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(170, 633)
+length = 280
+decay = 0.5
+
+[node name="Oak" type="Node2D" parent="World"]
+script = ExtResource("16")
+position = Vector2(560, 630)
+size = 1.15
+tree_seed = 4
+
+[node name="Car" type="StaticBody2D" parent="World"]
+script = ExtResource("17")
+position = Vector2(820, 637)
+size = 1.1
+facing_right = false
+
+[node name="Bush1" type="Node2D" parent="World"]
+script = ExtResource("18")
+position = Vector2(940, 636)
+size = Vector2(70, 40)
+bush_seed = 2
+z_index = -20
+
+[node name="Stump" type="StaticBody2D" parent="World"]
+script = ExtResource("19")
+position = Vector2(380, 633)
+axe = true
+
+[node name="Puddle" type="Node2D" parent="World"]
+script = ExtResource("20")
+position = Vector2(300, 636)
+half_width = 60
+depth_offset = 3
+
+[node name="Puddle2" type="Node2D" parent="World"]
+script = ExtResource("20")
+position = Vector2(690, 636)
+half_width = 45
+depth_offset = 4
+
+[node name="Water1" type="Node2D" parent="World"]
+script = ExtResource("21")
+position = Vector2(1076, 664)
+size = Vector2(250, 120)
+current = 0
+
+[node name="DeadTree" type="Node2D" parent="World"]
+script = ExtResource("22")
+position = Vector2(1040, 636)
+height = 285
+trunk_width = 20
+fall_direction = 1
+fall_angle = 87
+trigger = 0
+tree_seed = 8
+
+[node name="Reeds1" type="Node2D" parent="World"]
+script = ExtResource("23")
+position = Vector2(985, 634)
+width = 50
+height = 50
+reed_seed = 2
+z_index = 5
+
+[node name="Reeds2" type="Node2D" parent="World"]
+script = ExtResource("23")
+position = Vector2(1340, 637)
+width = 70
+height = 58
+reed_seed = 3
+z_index = 5
+
+[node name="CP1" type="Area2D" parent="World"]
+script = ExtResource("24")
+position = Vector2(1420, 430)
+size = Vector2(40, 220)
+
+[node name="Rock1" type="StaticBody2D" parent="World"]
+script = ExtResource("25")
+position = Vector2(1590, 636)
+size = Vector2(64, 34)
+rock_seed = 3
+
+[node name="Crawler" type="CharacterBody2D" parent="World"]
+script = ExtResource("26")
+position = Vector2(1820, 662)
+patrol_left = 110
+patrol_right = 110
+start_facing = -1
+
+[node name="Rock2" type="StaticBody2D" parent="World"]
+script = ExtResource("25")
+position = Vector2(2040, 634)
+size = Vector2(46, 26)
+rock_seed = 7
 
 [node name="TreeA" type="Node2D" parent="World"]
-z_index = -30
-position = Vector2(1630, 638)
-script = ExtResource("tree")
+script = ExtResource("27")
+position = Vector2(1500, 636)
 tree_seed = 7
-size = 1.15
+size = 1.1
+z_index = -30
+
+[node name="Bales1" type="Node2D" parent="World"]
+script = ExtResource("28")
+position = Vector2(2330, 632)
+bottom_row = 3
+rows = 2
+radius = 27
+
+[node name="FarmWall" type="Node2D" parent="World"]
+script = ExtResource("29")
+position = Vector2(2560, 634)
+size = Vector2(250, 150)
+crumble = 0.45
+windows = 1
+wall_seed = 4
+gable = 55
+
+[node name="Oak2" type="Node2D" parent="World"]
+script = ExtResource("16")
+position = Vector2(3030, 633)
+size = 1.25
+tree_seed = 9
+
+[node name="Bales2" type="Node2D" parent="World"]
+script = ExtResource("28")
+position = Vector2(3290, 632)
+bottom_row = 2
+rows = 2
+radius = 28
+bale_seed = 3
+
+[node name="Stalker1" type="CharacterBody2D" parent="World"]
+script = ExtResource("30")
+position = Vector2(2820, 632)
+patrol_left = 420
+patrol_right = 360
+start_facing = -1
+sight_range = 330
+pause_time = 2.2
+
+[node name="Burrower" type="Node2D" parent="World"]
+script = ExtResource("31")
+position = Vector2(2165, 634)
+patch_width = 110
+
+[node name="Fence2" type="Node2D" parent="World"]
+script = ExtResource("15")
+position = Vector2(2420, 630)
+length = 130
+decay = 0.7
+fence_seed = 4
+
+[node name="Puddle3" type="Node2D" parent="World"]
+script = ExtResource("20")
+position = Vector2(2900, 633)
+half_width = 70
+
+[node name="CP2" type="Area2D" parent="World"]
+script = ExtResource("24")
+position = Vector2(3400, 430)
+size = Vector2(40, 220)
+
+[node name="Bridge" type="StaticBody2D" parent="World"]
+script = ExtResource("32")
+position = Vector2(3478, 637)
+end = Vector2(424, 0)
+sag = 26
+plank_width = 13
+missing = PackedInt32Array(9, 10, 11, 18, 19, 20)
+collapses = true
+hold_time = 0.4
+
+[node name="Abyss" type="Area2D" parent="World"]
+script = ExtResource("33")
+position = Vector2(3490, 840)
+size = Vector2(400, 80)
+cause = "fell"
+
+[node name="Ravine" type="Node2D" parent="World"]
+script = ExtResource("34")
+position = Vector2(3488, 640)
+size = Vector2(400, 130)
+chasm_seed = 2
 
 [node name="TreeB" type="Node2D" parent="World"]
+script = ExtResource("27")
+position = Vector2(3960, 636)
+tree_seed = 21
+size = 1.2
 z_index = -30
-position = Vector2(2230, 638)
-script = ExtResource("tree")
-tree_seed = 19
-size = 0.95
 
 [node name="TreeC" type="Node2D" parent="World"]
-z_index = -30
-position = Vector2(2525, 638)
-script = ExtResource("tree")
+script = ExtResource("27")
+position = Vector2(4150, 634)
 tree_seed = 31
-size = 1.25
+size = 1
+z_index = -30
+
+[node name="TreeD" type="Node2D" parent="World"]
+script = ExtResource("27")
+position = Vector2(4300, 630)
+tree_seed = 14
+size = 0.9
+z_index = -30
+
+[node name="TrapTree" type="Node2D" parent="World"]
+script = ExtResource("22")
+position = Vector2(4560, 633)
+height = 250
+trunk_width = 22
+fall_direction = -1
+fall_angle = 86
+trigger = 1
+trigger_distance = 125
+warning_time = 0.8
+tree_seed = 12
+
+[node name="TreeE" type="Node2D" parent="World"]
+script = ExtResource("27")
+position = Vector2(4720, 632)
+tree_seed = 40
+size = 1.2
+z_index = -30
+
+[node name="Bush2" type="Node2D" parent="World"]
+script = ExtResource("18")
+position = Vector2(4420, 632)
+size = Vector2(50, 34)
+bush_seed = 5
+thorny = true
+z_index = 5
+
+[node name="CP3" type="Area2D" parent="World"]
+script = ExtResource("24")
+position = Vector2(4740, 430)
+size = Vector2(40, 220)
+
+[node name="Log" type="CharacterBody2D" parent="World"]
+script = ExtResource("35")
+position = Vector2(4745, 632)
+kind = 2
+size = Vector2(92, 22)
+crate_seed = 3
+
+[node name="Pond" type="Node2D" parent="World"]
+script = ExtResource("21")
+position = Vector2(4846, 664)
+size = Vector2(412, 130)
+current = 42
+
+[node name="Reeds3" type="Node2D" parent="World"]
+script = ExtResource("23")
+position = Vector2(5268, 637)
+width = 60
+height = 52
+reed_seed = 6
+z_index = 5
+
+[node name="RockFace" type="Node2D" parent="World"]
+script = ExtResource("36")
+position = Vector2(5420, 633)
+size = Vector2(160, 110)
+rock_seed = 4
+
+[node name="Barn" type="Node2D" parent="World"]
+script = ExtResource("29")
+position = Vector2(5620, 634)
+size = Vector2(200, 175)
+crumble = 0.2
+windows = 2
+wall_seed = 8
+gable = 48
+ivy = 0.5
+
+[node name="Loft" type="StaticBody2D" parent="World"]
+script = ExtResource("37")
+position = Vector2(5900, 631)
+stacks = PackedInt32Array(2, 1)
+crate_size = 34
+
+[node name="LoftFloor" type="StaticBody2D" parent="World"]
+script = ExtResource("38")
+position = Vector2(5945, 560)
+size = Vector2(150, 10)
+style = 2
+
+[node name="LoftPost" type="StaticBody2D" parent="World"]
+script = ExtResource("38")
+position = Vector2(6080, 570)
+size = Vector2(8, 62)
+style = 2
+
+[node name="GateLever" type="Node2D" parent="World"]
+script = ExtResource("39")
+position = Vector2(6060, 560)
+targets = Array[NodePath]([NodePath("../FarmGate")])
+
+[node name="Bales3" type="Node2D" parent="World"]
+script = ExtResource("28")
+position = Vector2(6220, 633)
+bottom_row = 2
+rows = 1
+radius = 26
+bale_seed = 7
+
+[node name="Stalker2" type="CharacterBody2D" parent="World"]
+script = ExtResource("30")
+position = Vector2(6420, 632)
+patrol_left = 150
+patrol_right = 110
+start_facing = 1
+sight_range = 320
+pause_time = 2.5
+
+[node name="BarnBack" type="Node2D" parent="World"]
+script = ExtResource("29")
+position = Vector2(6600, 634)
+size = Vector2(300, 240)
+crumble = 0
+windows = 2
+wall_seed = 11
+
+[node name="BarnRoof" type="StaticBody2D" parent="World"]
+script = ExtResource("40")
+position = Vector2(6560, 404)
+profile = PackedVector2Array(0, 0, 196, -86, 392, 0)
+thickness = 16
+cladding = 1
+damage = 0.45
+weathervane = true
+roof_seed = 3
+
+[node name="BarnWallL" type="StaticBody2D" parent="World"]
+script = ExtResource("38")
+position = Vector2(6590, 404)
+size = Vector2(36, 112)
+style = 2
+detail_seed = 4
+
+[node name="BarnWallR" type="StaticBody2D" parent="World"]
+script = ExtResource("38")
+position = Vector2(6890, 404)
+size = Vector2(30, 116)
+style = 2
+detail_seed = 6
+
+[node name="FarmGate" type="Node2D" parent="World"]
+script = ExtResource("41")
+position = Vector2(6596, 516)
+size = Vector2(24, 118)
+direction = 0
+style = 2
+speed = 45
+
+[node name="BarnLantern" type="Node2D" parent="World"]
+script = ExtResource("42")
+position = Vector2(6800, 420)
+drop = 34
+light_radius = 70
+
+[node name="GateLamp" type="Node2D" parent="World"]
+script = ExtResource("43")
+position = Vector2(6545, 500)
+bulbs = PackedVector2Array(0, 0)
+post_height = 134
+behaviour = 1
+turns_on_at = 0.3
+moth_count = 5
+
+[node name="Oak3" type="Node2D" parent="World"]
+script = ExtResource("16")
+position = Vector2(7080, 610)
+size = 0.95
+tree_seed = 12
 
 [node name="Windmill" type="Node2D" parent="World"]
+script = ExtResource("44")
+position = Vector2(7240, 598)
 z_index = -30
-position = Vector2(2862, 637)
-script = ExtResource("windmill")
 
-[node name="Grass" type="Node2D" parent="World"]
-z_index = 5
-position = Vector2(0, 636)
-script = ExtResource("grass")
-
-[node name="Puddles" type="Node2D" parent="World"]
-
-[node name="Puddle1" type="Node2D" parent="World/Puddles"]
-position = Vector2(300, 636)
-script = ExtResource("puddle")
-half_width = 70.0
-depth_offset = 3.0
-
-[node name="Puddle2" type="Node2D" parent="World/Puddles"]
-position = Vector2(705, 636)
-script = ExtResource("puddle")
-half_width = 50.0
-depth_offset = 6.0
-
-[node name="Puddle3" type="Node2D" parent="World/Puddles"]
-position = Vector2(1050, 636)
-script = ExtResource("puddle")
-half_width = 105.0
-depth_offset = 1.0
-
-[node name="Puddle4" type="Node2D" parent="World/Puddles"]
-position = Vector2(1390, 636)
-script = ExtResource("puddle")
-half_width = 80.0
-depth_offset = 7.0
-
-[node name="Puddle5" type="Node2D" parent="World/Puddles"]
-position = Vector2(1705, 636)
-script = ExtResource("puddle")
-half_width = 150.0
-depth_offset = 4.0
-
-[node name="Puddle6" type="Node2D" parent="World/Puddles"]
-position = Vector2(2180, 636)
-script = ExtResource("puddle")
-half_width = 95.0
-depth_offset = 2.0
-
-[node name="Puddle7" type="Node2D" parent="World/Puddles"]
-position = Vector2(2480, 636)
-script = ExtResource("puddle")
-half_width = 120.0
-depth_offset = 6.0
-
-[node name="Puddle8" type="Node2D" parent="World/Puddles"]
-position = Vector2(2845, 636)
-script = ExtResource("puddle")
-half_width = 90.0
-depth_offset = 3.0
+[node name="Exit" type="Area2D" parent="World"]
+script = ExtResource("45")
+position = Vector2(7280, 300)
+size = Vector2(120, 320)
 
 [node name="Creatures" type="Node2D" parent="."]
 
-[node name="Frog1" type="Node2D" parent="Creatures"]
-position = Vector2(260, 637)
-script = ExtResource("frog")
+[node name="Frog" type="Node2D" parent="Creatures"]
+script = ExtResource("46")
+position = Vector2(260, 633)
 
 [node name="Frog2" type="Node2D" parent="Creatures"]
-position = Vector2(700, 637)
-script = ExtResource("frog")
+script = ExtResource("46")
+position = Vector2(720, 633)
 
 [node name="Frog3" type="Node2D" parent="Creatures"]
-position = Vector2(1180, 637)
-script = ExtResource("frog")
+script = ExtResource("46")
+position = Vector2(1380, 633)
 
 [node name="Frog4" type="Node2D" parent="Creatures"]
-position = Vector2(1560, 637)
-script = ExtResource("frog")
+script = ExtResource("46")
+position = Vector2(2250, 633)
 
 [node name="Frog5" type="Node2D" parent="Creatures"]
-position = Vector2(1990, 637)
-script = ExtResource("frog")
+script = ExtResource("46")
+position = Vector2(4060, 633)
 
 [node name="Frog6" type="Node2D" parent="Creatures"]
-position = Vector2(2300, 637)
-script = ExtResource("frog")
+script = ExtResource("46")
+position = Vector2(5320, 633)
 
 [node name="Frog7" type="Node2D" parent="Creatures"]
-position = Vector2(2770, 637)
-script = ExtResource("frog")
+script = ExtResource("46")
+position = Vector2(5800, 633)
 
-[node name="Crow1" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
-position = Vector2(1570, 420)
-script = ExtResource("crow")
+[node name="Crow" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
+script = ExtResource("47")
+position = Vector2(200, 440)
 power_line = NodePath("../../World/PowerLine")
 
 [node name="Crow2" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
-position = Vector2(1961, 420)
-script = ExtResource("crow")
+script = ExtResource("47")
+position = Vector2(380, 440)
 power_line = NodePath("../../World/PowerLine")
 
 [node name="Crow3" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
-position = Vector2(2229, 420)
-script = ExtResource("crow")
+script = ExtResource("47")
+position = Vector2(520, 440)
 power_line = NodePath("../../World/PowerLine")
 
 [node name="Crow4" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
-position = Vector2(2433, 420)
-script = ExtResource("crow")
+script = ExtResource("47")
+position = Vector2(700, 440)
 power_line = NodePath("../../World/PowerLine")
 
 [node name="Crow5" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
-position = Vector2(1604, 420)
-script = ExtResource("crow")
+script = ExtResource("47")
+position = Vector2(860, 440)
 power_line = NodePath("../../World/PowerLine")
 
-[node name="Crow6" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
-position = Vector2(1964, 420)
-script = ExtResource("crow")
-power_line = NodePath("../../World/PowerLine")
-
-[node name="Crow7" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
-position = Vector2(2211, 420)
-script = ExtResource("crow")
-power_line = NodePath("../../World/PowerLine")
-
-[node name="Crow8" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
-position = Vector2(2560, 420)
-script = ExtResource("crow")
-power_line = NodePath("../../World/PowerLine")
-
-[node name="Crow9" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
-position = Vector2(1658, 420)
-script = ExtResource("crow")
-power_line = NodePath("../../World/PowerLine")
-
-[node name="PlasticBag1" type="Node2D" parent="Creatures"]
-position = Vector2(1300, 631)
-script = ExtResource("bag")
-
-[node name="PlasticBag2" type="Node2D" parent="Creatures"]
+[node name="Bag" type="Node2D" parent="Creatures"]
+script = ExtResource("48")
 position = Vector2(2600, 631)
-script = ExtResource("bag")
 
-[node name="Player" parent="." instance=ExtResource("player")]
-position = Vector2(300, 600)
+[node name="Starlings" type="Node2D" parent="Creatures"]
+script = ExtResource("49")
+starts_at = 0.12
+ends_at = 0.5
+height = 0.3
+
+[node name="Bats" type="Node2D" parent="Creatures"]
+script = ExtResource("50")
+starts_at = 0.35
+
+[node name="Fireflies1" type="Node2D" parent="Creatures"]
+script = ExtResource("51")
+position = Vector2(150, 520)
+size = Vector2(460, 100)
+count = 22
+
+[node name="Fireflies2" type="Node2D" parent="Creatures"]
+script = ExtResource("51")
+position = Vector2(1360, 540)
+size = Vector2(320, 90)
+count = 16
+
+[node name="Fireflies3" type="Node2D" parent="Creatures"]
+script = ExtResource("51")
+position = Vector2(5650, 530)
+size = Vector2(560, 100)
+count = 26
+
+[node name="Cat" type="Node2D" parent="Creatures"]
+script = ExtResource("52")
+position = Vector2(3160, 633)
+wander_left = 70
+wander_right = 90
+
+[node name="Fish1" type="Node2D" parent="Creatures"]
+script = ExtResource("53")
+position = Vector2(1090, 664)
+width = 220
+
+[node name="Fish2" type="Node2D" parent="Creatures"]
+script = ExtResource("53")
+position = Vector2(4870, 664)
+width = 370
+
+[node name="Player" parent="." instance=ExtResource("54")]
 
 [node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
-script = ExtResource("camera")
+script = ExtResource("55")
 target = NodePath("../Player")
 
 [node name="Foreground" type="Parallax2D" parent="."]
-z_index = 30
 scroll_scale = Vector2(1.25, 1)
+z_index = 30
 
 [node name="Reeds" type="Node2D" parent="Foreground"]
+script = ExtResource("56")
 position = Vector2(0, 635)
-script = ExtResource("grass")
-width = 3500.0
+width = 9620
 spacing_min = 2.5
-spacing_max = 9.0
-height_min = 150.0
-height_max = 290.0
-tall_chance = 0.0
+spacing_max = 9
+height_min = 150
+height_max = 290
+tall_chance = 0
 blade_width = 3.2
 clustered = true
-base_depth = 155.0
+base_depth = 155
 grass_seed = 4
 wind_response = 0.3
 player_pushes = false
-
-[node name="DebugOverlay" type="CanvasLayer" parent="."]
-script = ExtResource("overlay")
