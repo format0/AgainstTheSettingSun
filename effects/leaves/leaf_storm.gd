@@ -43,7 +43,7 @@ func _process(_delta: float) -> void:
 		p.global_position = Vector2(view.end.x + 60.0, view.position.y + view.size.y * 0.45)
 		var pm := p.process_material as ParticleProcessMaterial
 		pm.gravity = Vector3(-Weather.wind * 220.0 * (0.5 + 0.6 * Weather.gust), 30.0, 0.0)
-		p.amount_ratio = clampf((Weather.wind - 0.2) * 0.8 * density * maxf(Weather.storm, 0.4), 0.0, 1.0)
+		p.amount_ratio = clampf((Weather.wind - 0.2) * 0.8 * density * maxf(Weather.storm, 0.4) * VFX.v("leaves"), 0.0, 1.0)
 
 
 func set_effect_enabled(on: bool) -> void:

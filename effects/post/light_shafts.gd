@@ -9,6 +9,11 @@ extends PostEffect
 
 func _ready() -> void:
 	_setup(preload("res://effects/post/light_shafts.gdshader"), Layers.CANVAS_LIGHT_SHAFTS)
+	if Game.instance:
+		# the Game draws real shafts through the gaps between silhouettes; this sets their strength
+		visible = false
+		Game.instance.rays_level = strength / 0.38
+		set_process(false)
 
 
 func _process(_delta: float) -> void:

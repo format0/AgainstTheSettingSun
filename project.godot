@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Against the Setting Sun"
 config/description="Run, hide and solve your way to the exit before the sun is gone."
-run/main_scene="res://levels/level_01/level_01.tscn"
+run/main_scene="res://game/game.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 

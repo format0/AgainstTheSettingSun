@@ -25,6 +25,8 @@ void fragment() {
 		vec2 d = L - bulbs[i].xy;
 		float r = length(d);
 		acc += light_color * I * (exp(-r / 4.0) * .9 + exp(-r / 30.0) * .12);
+		// the wide soft halo of a lamp seen through rain
+		acc += light_color * I * exp(-r / 58.0) * (.06 + .08 * fog) * (1.0 - smoothstep(100.0, 125.0, r));
 		if (d.y > -2.0) {
 			float ang = abs(d.x) / (d.y + 7.0);
 			float edge = 1.0 - smoothstep(.40, .64, ang);

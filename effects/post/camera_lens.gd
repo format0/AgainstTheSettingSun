@@ -16,6 +16,11 @@ extends PostEffect
 
 func _ready() -> void:
 	_setup(preload("res://effects/post/camera_lens.gdshader"), Layers.CANVAS_LENS)
+	if Game.instance:
+		# the Game's final pass does all of this (with bloom); only the lens rain limit is passed on
+		visible = false
+		Game.instance.lens_level = lens_rain_max if lens_rain else 0.0
+		set_process(false)
 
 
 func _process(_delta: float) -> void:

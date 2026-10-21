@@ -89,6 +89,9 @@ func _draw() -> void:
 		var w0: float = b.thick * 0.5
 		var w1: float = b.thick * 0.31
 		draw_colored_polygon(PackedVector2Array([start + n * w0, end + n * w1, end - n * w1, start - n * w0]), Color.BLACK)
+		# round joints, so bends between branches don't show notches
+		draw_circle(start, w0, Color.BLACK)
+		draw_circle(end, w1, Color.BLACK)
 		if bare:
 			continue
 		for l in b.leaves:

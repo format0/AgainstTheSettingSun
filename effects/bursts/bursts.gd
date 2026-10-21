@@ -19,6 +19,7 @@ static func create(k: Kind) -> Bursts:
 
 
 func _ready() -> void:
+	Game.no_occlude(self)
 	add_to_group(["dust_emitters", "ember_emitters", "leaf_emitters"][kind])
 	z_as_relative = false
 	match kind:

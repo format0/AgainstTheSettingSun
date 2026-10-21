@@ -12,6 +12,7 @@ uniform float bolt_x = 0.0;
 uniform float storm = 1.0;
 uniform float cloud_cover = 0.40;
 uniform float dusk = 0.0;
+uniform float sun_glow = 1.0;
 uniform vec3 zenith : source_color = vec3(0.045, 0.022, 0.035);
 uniform vec3 high_sky : source_color = vec3(0.26, 0.06, 0.05);
 uniform vec3 low_sky : source_color = vec3(0.78, 0.25, 0.07);
@@ -27,8 +28,8 @@ void fragment() {
 	vec2 L = UV * view_size;
 	float h = L.y / view_size.y;
 	// the palette drains from orange to wine red to a deep blue-violet night
-	float d1 = smoothstep(0.15, 0.65, dusk);
-	float d2 = smoothstep(0.55, 1.0, dusk);
+	float d1 = smoothstep(0.3, 0.78, dusk);
+	float d2 = smoothstep(0.66, 1.0, dusk);
 	vec3 zen = mix(mix(zenith, vec3(0.03, 0.02, 0.045), d1), vec3(0.006, 0.007, 0.016), d2);
 	vec3 hi = mix(mix(high_sky, vec3(0.16, 0.04, 0.07), d1), vec3(0.02, 0.018, 0.04), d2);
 	vec3 lo = mix(mix(low_sky, vec3(0.55, 0.12, 0.08), d1), vec3(0.06, 0.03, 0.06), d2);
@@ -37,7 +38,7 @@ void fragment() {
 	c = mix(c, lo, smoothstep(.36, .72, h));
 	c = mix(c, hor, smoothstep(.70, .83, h));
 	float d = length((L - sun_pos) * vec2(1., 1.2));
-	c += vec3(1., .50, .16) * (exp(-d / 240.) * .30 + exp(-d / 60.) * .5) * smoothstep(.15, .8, h + .1);
+	c += vec3(1., .50, .16) * (exp(-d / 240.) * .30 + exp(-d / 60.) * .5) * smoothstep(.15, .8, h + .1) * sun_glow;
 
 	vec2 sp = vec2(L.x + cam_x * .06, L.y);
 	float t = weather_time;

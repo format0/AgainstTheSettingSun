@@ -38,11 +38,16 @@ var memory := {}
 var overlay: ScreenOverlay
 
 var _respawned := false
+var _redirect := false
 
 @onready var player: Player = get_tree().get_first_node_in_group("player")
 
 
 func _enter_tree() -> void:
+	if Game.instance == null:
+		# run on its own (F6): start the Game around this level instead
+		_redirect = true
+		return
 	current = self
 	Weather.reset()
 	var r := _respawn_data()
@@ -56,8 +61,11 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
-	overlay = ScreenOverlay.new()
-	add_child(overlay)
+	if _redirect:
+		Game.start_with(scene_file_path)
+		return
+	overlay = Game.instance.overlay
+	Game.mark_occluders(self)
 	for k: Bursts.Kind in [Bursts.Kind.DUST, Bursts.Kind.EMBERS, Bursts.Kind.LEAVES]:
 		add_child(Bursts.create(k))
 	var r := _respawn_data()
@@ -71,7 +79,14 @@ func _ready() -> void:
 		overlay.show_title(level_title, level_subtitle)
 
 
+func _exit_tree() -> void:
+	if current == self:
+		current = null
+
+
 func _process(delta: float) -> void:
+	if _redirect:
+		return
 	if state == State.PLAYING or state == State.DYING:
 		Daylight.progress = minf(1.0, Daylight.progress + delta / maxf(sunset_seconds, 1.0))
 		if Daylight.progress >= 1.0 and state == State.PLAYING:
@@ -81,10 +96,10 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("restart"):
 		_clear_respawn()
-		get_tree().reload_current_scene()
+		Game.instance.reload_level()
 	elif state == State.ESCAPED and next_level == "" and event.is_action_pressed("action"):
 		_clear_respawn()
-		get_tree().change_scene_to_file("res://levels/level_01/level_01.tscn")
+		Game.instance.load_level.call_deferred("res://levels/level_01/level_01.tscn")
 
 
 # ------------------------------------------------------------------ memory
@@ -123,7 +138,7 @@ func player_died(_cause: String) -> void:
 	await overlay.fade_to_black(1.0)
 	r.progress = Daylight.progress
 	Engine.set_meta("respawn", r)
-	get_tree().reload_current_scene()
+	Game.instance.reload_level()
 
 
 func player_escaped() -> void:
@@ -135,7 +150,7 @@ func player_escaped() -> void:
 		player.escape()
 	await overlay.fade_to_black(2.5)
 	if next_level != "":
-		get_tree().change_scene_to_file(next_level)
+		Game.instance.load_level.call_deferred(next_level)
 	else:
 		overlay.show_message("the sun has set behind you", "you made it through")
 
@@ -148,7 +163,7 @@ func _light_gone() -> void:
 	overlay.show_message("the light is gone")
 	await overlay.fade_to_black(4.0)
 	await get_tree().create_timer(1.5).timeout
-	get_tree().reload_current_scene()
+	Game.instance.reload_level()
 
 
 func _store_respawn(at: Vector2, mem: Dictionary) -> void:

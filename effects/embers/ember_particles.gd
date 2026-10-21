@@ -19,6 +19,7 @@ static func texture() -> Texture2D:
 
 static func make(extents: Vector2, amount: int) -> GPUParticles2D:
 	var fx := GPUParticles2D.new()
+	Game.no_occlude(fx)
 	fx.texture = texture()
 	fx.amount = maxi(amount, 4)
 	fx.lifetime = 2.6

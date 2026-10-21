@@ -28,7 +28,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	var view := GameCamera.view_rect
 	# the sun sinks below the horizon as the level goes on
-	var sink := Vector2(0, smoothstep(0.0, 0.85, Daylight.progress) * 230.0)
+	var sink := Vector2(0, smoothstep(0.1, 0.9, Daylight.progress) * 230.0)
 	var sun := sun_screen_position + sink - Vector2(view.position.x * sun_parallax, view.position.y)
 	Weather.sun_screen_pos = sun
 	_mat.set_shader_parameter("view_size", view.size)
@@ -40,3 +40,4 @@ func _process(_delta: float) -> void:
 	_mat.set_shader_parameter("storm", Weather.storm)
 	_mat.set_shader_parameter("cloud_cover", cloud_cover)
 	_mat.set_shader_parameter("dusk", Daylight.progress)
+	_mat.set_shader_parameter("sun_glow", VFX.v("sun_glow"))

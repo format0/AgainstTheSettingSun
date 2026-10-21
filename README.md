@@ -10,10 +10,27 @@ for the levels. The only picture in the project is the runner's animation sheet.
 **Controls:** ← → run, ↑ jump, **Space** is the one action button (pull a lever, push a dead
 tree over, hold it to grab a crate and pull).
 
-Developer keys: **R** restart the level, **L** lightning, **F1** debug panel (with the panel open,
-1–9, 0, - and = switch single effects off and on).
+Developer keys: **R** restart the level, **L** lightning, **F1** the look panel (see below).
 
 The project uses the *Compatibility* renderer, so it runs on built-in laptop graphics and can be exported to the web.
+
+### The look, and the F1 panel
+The game starts `game/game.tscn`, which loads each level into its own viewport and builds the
+final picture from it the way the first WebGL version did: the bright parts of the picture
+are blurred twice (a near glow and a wide haze glow) and laid back over it, the sun shines
+through the gaps between the silhouettes as light shafts, edges are softened, and a colour
+grade, lens drops, grain and a vignette finish it. A level scene run on its own (F6) starts
+inside the game by itself.
+
+**F1** opens a panel (use the mouse; the arrow keys still run) with a slider or switch for
+everything that shapes the look: bloom, threshold and wide glow, light shafts, lamp and sun
+glow, edge softening, diffusion, haze and fog, exposure, warmth, saturation, contrast,
+vignette, grain, colour fringing, lens rain, the amount of rain, rain stopping under roofs,
+gust sheets, drips, splashes, leaves, bats, fireflies, dust in the light, steam, chimney
+smoke and sparks. It also has the time of day (with "Stop the sun"), the storm strength,
+"Nothing can kill me", a lightning button, and a switch for each effect node in the level.
+Settings are saved when the panel closes (`user://vfx.cfg`); **Copy** puts them all on the
+clipboard, and **Reset** goes back to the defaults in `core/vfx.gd`.
 
 ---
 
@@ -25,15 +42,15 @@ The project uses the *Compatibility* renderer, so it runs on built-in laptop gra
 | **The sun sets** | Each level has a clock (`Level.sunset_seconds`). The sky drains from orange to night, lamps switch on, the picture closes in. When the light is gone the level starts over from the beginning. |
 | **Dying** | Creatures, molten steel, deep water, falls, crushing machinery and falling trees kill. You come back at the last `Checkpoint`, and whatever you changed before it stays changed (levers, fallen trees, broken bridges, moved crates). The sun keeps setting, so every death costs time. |
 | **Shadows** | The runner is black like everything else. In front of a black shape (a `Cover`: a wall, a hay stack, a big trunk, a container...) he disappears: creatures that hunt by sight can't see him and walk right past him. A faint warm rim shows the player where he is. Light (street lamps, lanterns, fire, molten steel) takes the shadow away. |
-| **Creatures** | *Hunters* (Stalker, Hound) see you in a cone in front of them, freeze, shriek and chase you. Break their line of sight or hide and they search for a while, then go back. *Blind ones* (Crawler) just walk their round and find you by touch. None of them can jump. Loud landings, crashes and grinding gates make hunters come to look. |
+| **Creatures** | *Hunters* (Stalker, Hound) see you in a cone in front of them, freeze, shriek and chase you. Break their line of sight or hide and they search for a while, then go back. *Blind ones* (Crawler) just walk their round and find you by touch. None of them can jump. Loud landings, crashes and grinding gates make hunters come to look. Three others behave differently: the *Dangler* hangs from a beam or a branch and drops on you when you pass beneath it in the open (bait it, step back, go while it climbs); the *Burrower* lives under soft ground and bursts up where it hears a step or feels you standing (jump its patch or keep running); the *Watcher* sits high up and sweeps a beam of light. It can't hurt you, but its beam takes your shadow away, and when it finds you it screams and the hunters come. |
 | **Storm** | Each level has its own weather (`WeatherController.storm`): rain, wind, lightning. Wind moves trees, grass, cloth, chains, swinging beams, tarps and drifting rafts, never the runner. |
 
 ### The levels
 | | Setting | Weather | What happens |
 |---|---|---|---|
-| I · The Fields | meadows, a creek, a farm | light rain, breeze | push a dead tree over the creek, jump a crawler, sneak past a stalker using hay, a ruin and an oak, run over a collapsing rope bridge, outrun a falling tree, ride a log across a pond, open the barn gate (the grinding draws the stalker over) |
-| II · The Works | an abandoned steelworks | heavy rain, lightning | swinging beams over molten steel, steam hammers (time them, or climb up and cut two of them), drag a crate onto a plate to open a gate, a stalker in the warehouse (lure it onto a trap door over a molten pit), drop a concrete block into a rebar pit as a stepping stone, ride a lift past a crawler, slip past a creature dozing by a fire |
-| III · The Quarry | cliffs, a flooded pit, a pine forest | wild storm | come down quietly into a hound's basin, ride a ropeway pallet over flooded water, a rotten rope bridge, close the hatch over a flooded shaft (and hide when the hound comes to look), a stone that drops a tree across a gully, another tree that falls on you, a ropeway car over the abyss, the climb to the last light |
+| I · The Fields | meadows, a creek, a farm | light rain, breeze | push a dead tree over the creek, jump a crawler, cross a burrower's field, sneak past a stalker using hay, a ruin and an oak, run over a collapsing rope bridge, outrun a falling tree, ride a log across a pond, open the barn gate (the grinding draws the stalker over) |
+| II · The Works | an abandoned steelworks | heavy rain, lightning | swinging beams over molten steel, steam hammers (time them, or climb up and cut two of them), drag a crate onto a plate to open a gate, a stalker in the warehouse (lure it onto a trap door over a molten pit), drop a concrete block into a rebar pit as a stepping stone, bait the dangler under the crane, ride a lift past a crawler under a watcher's beam, slip past a creature dozing by a fire |
+| III · The Quarry | cliffs, a flooded pit, a pine forest | wild storm | cross a burrower on the rim, come down quietly into a hound's basin, ride a ropeway pallet over flooded water, a rotten rope bridge, close the hatch over a flooded shaft (and hide when the hound comes to look), cross the yard between the sweeps of a watcher's beam, a stone that drops a tree across a gully, a dangler in the pines, another tree that falls on you, a ropeway car over the abyss, the climb to the last light |
 
 ---
 
@@ -52,9 +69,10 @@ enemies/       ■ purple  creatures that kill on touch
 cover/         ■ green   black shapes behind the player that hide him
 structures/    ■ white   solid things to stand on and bump into
 environment/   ■ grey    scenery only: trees, grass, lamps, fences, chains...
-creatures/     ■ grey    harmless animals: frogs, crows, a plastic bag
+creatures/     ■ grey    harmless animals: frogs, crows, bats, fireflies, a cat, rats, fish
 effects/       weather and look: sky, rain, fog, lightning, post effects, sound
-ui/            the fade and title overlay, the debug panel
+game/          the frame around the levels and the picture pipeline (bloom, light shafts, grade)
+ui/            the fade and title overlay, the F1 look panel
 ```
 
 In the editor every gameplay element also marks itself: orange dashed lines from switches to
@@ -66,6 +84,7 @@ purple patrol ranges and sight cones for creatures.
 |---|---|
 | `weather.gd` | Shared weather state (`Weather.wind`, `Weather.storm`, `Weather.flash`...). Everything reads it. |
 | `daylight.gd` | How far the sun has set (`Daylight.progress` 0..1). Sky, fog, rain, lamps and lens read it. |
+| `vfx.gd` | Every setting of the look (`VFX.v("bloom")`, `VFX.on("bats")`), with defaults, ranges and the panel's labels. Add a line here and it shows up in the F1 panel. |
 | `game_camera.gd` | Follows the player, stays inside the level, shakes on lightning and heavy impacts. |
 | `layers.gd` | Draw order (z_index) of everything, and the physics layers. |
 | `draw_kit.gd` | Drawing helpers for silhouettes: chains, ropes, trusses, limbs, rocks, rough edges, vines, editor markers. |
@@ -75,7 +94,7 @@ purple patrol ranges and sight cones for creatures.
 ### gameplay/ and levels/
 | Node | Use it for |
 |---|---|
-| `Level` (root script) | Title, next level, size, spawn point, footstep surface, sunset length and start. Creates the overlay and the burst effects. |
+| `Level` (root script) | Title, next level, size, spawn point, footstep surface, sunset length and start. Creates the burst effects; the game around it shows the title and the fades. |
 | `Checkpoint` | Where the player comes back after dying. |
 | `LevelExit` | The end of the level. |
 
@@ -101,7 +120,14 @@ then stays as a platform), `RebarSpikes`, `KillZone` (bottom of an abyss).
 
 ### enemies/
 `Enemy` is the base (patrol, sight, chase, search, hearing, death). `Stalker` (tall hunter),
-`Hound` (fast hunter), `Crawler` (blind patroller).
+`Hound` (fast hunter), `Crawler` (blind patroller). Not built on `Enemy`: `Dangler` (drops from
+a thread), `Burrower` (strikes from under the ground at sounds), `Watcher` (a sweeping beam
+that raises the alarm).
+
+### creatures/
+Harmless life: `Frog`, `Crow` (sit on power lines, fly up when you come), `Bats` (come out at
+dusk and follow the view), `Fireflies` (in an area, blinking as the light goes), `StrayCat`
+(walks a ledge or a beam, washes, keeps away from you), `Rat`, `JumpingFish`, `PlasticBag`.
 
 ### cover/
 `Cover` is the base. `RuinedWall`, `OldOak`, `HayBales`, `RockFace`, `ShippingContainer`,
@@ -116,11 +142,15 @@ then stays as a platform), `RebarSpikes`, `KillZone` (bottom of an abyss).
 `GrassField`, `WindTree`, `PineTree`, `Bush`, `Cattails`, `WoodenFence`, `PowerLine`,
 `Windmill`, `ClothFlag`, `StreetLamp` (can switch on at dusk), `Lantern`, `FireBarrel`,
 `HangingChains`, `RustyPipes`, `Puddle`, `Chasm` (depth and mist in a ravine).
+Molten steel throws sparks and steam, the steam hammers and boilers hiss, and rain drips from
+the edges of roofs and girders.
 
 ### effects/
 `WeatherController`, `SkyEffect`, `LightningEffect`, `DistantScenery` (fields, works or quarry
-on the horizon), `RainLayer`, `RainSplashes`, `FogLayer`, `LeafStorm`, `WetGround`,
-`LightShafts`, `CameraLens`, `Ambience`. Bursts of dust, embers and leaves are made by the
+on the horizon, in two hazy layers with smoking chimneys), `RainLayer` (gust sheets; near rain
+stops under roofs), `RainSplashes` (splashes and drips), `FogLayer`, `LeafStorm`, `WetGround`,
+`LightShafts` and `CameraLens` (inside the game they only set how strong the shafts and lens
+drops are), `Ambience`. Bursts of dust, embers and leaves are made by the
 Level: `get_tree().call_group("dust_emitters", "burst", position, count, width)`.
 
 ---
@@ -144,5 +174,6 @@ Level: `get_tree().call_group("dust_emitters", "burst", position, count, width)`
    - give it `set_active(on, instant)` → switches can drive it;
    - call `Level.remember(self, state)` and read `Level.recall(self)` in `_ready()` → it survives a checkpoint respawn;
    - join `light_sources` with `illuminates(pos)` → it takes the player's shadow away; join `lamps` with `get_light_points()` → rain and fog glow around it;
+   - glows, fog and other see-through effects call `Game.no_occlude(node)` → they don't block the sun's shafts or the rain;
    - join `rain_surfaces` with `get_rain_edges()` → rain splashes on it; join `lightning_listeners` with `on_lightning()`;
    - call `player.make_noise(pos, radius)` → hunters come to look.

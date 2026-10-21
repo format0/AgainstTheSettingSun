@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://game/game.gd" id="1"]
+
+[node name="Game" type="Node"]
+script = ExtResource("1")
+first_level = "res://levels/level_01/level_01.tscn"

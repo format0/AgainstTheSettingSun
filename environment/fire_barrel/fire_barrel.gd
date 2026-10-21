@@ -39,6 +39,7 @@ func _ready() -> void:
 	_mat.set_shader_parameter("center", Vector2(s * 0.5, s * 0.5 - 8.0))
 	_mat.set_shader_parameter("radius", light_radius)
 	add_child(_light)
+	Game.no_occlude(_light)
 	_embers = EmberParticles.make(Vector2(8, 2), 14)
 	_embers.position = Vector2(0, -drum_height - 6)
 	add_child(_embers)
@@ -63,7 +64,7 @@ func _process(_delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
 	intensity = 0.8 + 0.12 * sin(Weather.time * 13.0) * sin(Weather.time * 7.3) + 0.08 * randf()
-	_mat.set_shader_parameter("intensity", intensity * (1.0 + (1.0 - Daylight.light()) * 0.5))
+	_mat.set_shader_parameter("intensity", intensity * (1.0 + (1.0 - Daylight.light()) * 0.5) * VFX.v("lamp_glow"))
 	_mat.set_shader_parameter("weather_time", Weather.time)
 	(_embers.process_material as ParticleProcessMaterial).gravity = Vector3(-Weather.wind * 90.0, -20.0, 0.0)
 	queue_redraw()

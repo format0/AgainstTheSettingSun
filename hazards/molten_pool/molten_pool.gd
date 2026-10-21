@@ -23,9 +23,12 @@ var _haze: ColorRect
 var _haze_mat: ShaderMaterial
 var _embers: GPUParticles2D
 var _bubbling: AudioStreamPlayer2D
+var _steam: Array[Dictionary] = []
+var _spark_wait := 1.0
 
 
 func _ready() -> void:
+	Game.no_occlude(self)
 	add_to_group("light_sources")
 	add_to_group("lamps")
 	z_index = Layers.WATER
@@ -96,13 +99,33 @@ func get_light_points() -> Array[Vector3]:
 	return out
 
 
+func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
+	# rain hissing into the hot metal: steam, lit orange from below
+	if VFX.on("steam") and randf() < delta * (4.0 + 10.0 * Weather.storm) * size.x / 200.0:
+		_steam.append({"p": Vector2(randf() * size.x, -4.0), "r": randf_range(6, 12), "age": 0.0, "life": randf_range(1.8, 3.2), "v": randf_range(18, 34)})
+	for s in _steam:
+		s.age += delta
+		s.r += 9.0 * delta
+		s.p += Vector2(-Weather.wind * 30.0 * minf(1.0, s.age), -s.v) * delta
+	_steam = _steam.filter(func(s): return s.age < s.life)
+	# a bubble bursts and throws sparks
+	_spark_wait -= delta
+	if _spark_wait <= 0.0:
+		_spark_wait = randf_range(0.6, 2.2) * 200.0 / maxf(size.x, 60.0)
+		if VFX.on("sparks"):
+			get_tree().call_group("ember_emitters", "burst", global_position + Vector2(randf() * size.x, -2), randi_range(4, 12))
+	queue_redraw()
+
+
 func _physics_process(_delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
 	_mat.set_shader_parameter("weather_time", Weather.time)
 	_mat.set_shader_parameter("world_x", global_position.x)
 	_glow_mat.set_shader_parameter("weather_time", Weather.time)
-	_glow_mat.set_shader_parameter("intensity", 1.0 + (1.0 - Daylight.light()) * 0.6)
+	_glow_mat.set_shader_parameter("intensity", (1.0 + (1.0 - Daylight.light()) * 0.6) * VFX.v("lamp_glow"))
 	_haze_mat.set_shader_parameter("weather_time", Weather.time)
 	var p := get_tree().get_first_node_in_group("player") as Player
 	if p and not p.dead:
@@ -118,6 +141,12 @@ func _physics_process(_delta: float) -> void:
 
 
 func _draw() -> void:
+	for s in _steam:
+		var k: float = s.age / s.life
+		var hot := 1.0 - smoothstep(0.0, 70.0, -s.p.y)
+		var col := Color(0.75, 0.62, 0.55).lerp(Color(1.0, 0.55, 0.28), hot)
+		col.a = 0.16 * smoothstep(0.0, 0.15, k) * (1.0 - k)
+		DrawKit.draw_puff(self, s.p, s.r * 1.6, col)
 	if Engine.is_editor_hint():
 		draw_rect(Rect2(Vector2.ZERO, size), Color(1.0, 0.45, 0.1, 0.8))
 		DrawKit.editor_box(self, Rect2(Vector2(0, -light_reach), Vector2(size.x, light_reach)), Color(1, 0.7, 0.3, 0.5), "lit: no hiding")

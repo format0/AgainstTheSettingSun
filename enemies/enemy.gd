@@ -268,6 +268,10 @@ func _touch(player: Player) -> void:
 func hear(at: Vector2) -> void:
 	if not hunts or dead or state in [State.ALERT, State.CHASE, State.ATTACK]:
 		return
+	if global_position.distance_to(at) < 90.0 and not _sees(get_tree().get_first_node_in_group("player") as Player):
+		# soft sounds right next to it: just turn and look
+		facing = 1 if at.x >= global_position.x else -1
+		return
 	facing = 1 if at.x >= global_position.x else -1
 	_noise_x = at.x
 	_enter(State.INVESTIGATE)

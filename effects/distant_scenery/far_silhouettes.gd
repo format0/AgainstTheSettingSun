@@ -1,12 +1,14 @@
 class_name FarSilhouettes
 extends Node2D
-## Far layer, drawn half transparent so the sky glows through (haze). What stands on the
-## horizon depends on the setting: a village with a church and old windmills in the fields,
+## Far layer. Everything is drawn in one opaque haze colour and the DistantScenery fades the
+## whole layer at once (a CanvasGroup), so overlapping shapes never darken each other and the
+## sky glows through evenly. What stands on the horizon depends on the setting: a village with a church and old windmills in the fields,
 ## chimneys, a gas holder and cranes at the works, mesas and a bucket ropeway at the quarry.
 ## Windows light up one by one as night comes. Now and then a flock of geese passes.
 
 @export var scroll_scale := 0.22
-@export var haze := 0.52
+## The colour of the far haze (multiplied by the remaining daylight).
+@export var tint := Color(0.17, 0.068, 0.052)
 @export var setting := DistantScenery.Setting.INDUSTRY
 
 var _mill_angle := 0.0
@@ -29,7 +31,7 @@ func _ready() -> void:
 func _stacks() -> Array[Vector2]:
 	match setting:
 		DistantScenery.Setting.INDUSTRY:
-			return [Vector2(960, 430), Vector2(995, 446), Vector2(1052, 418), Vector2(1700, 452), Vector2(2210, 440)]
+			return [Vector2(950, 430), Vector2(985, 446), Vector2(1062, 418), Vector2(1440, 452), Vector2(2150, 440)]
 		DistantScenery.Setting.FIELDS:
 			return [Vector2(386, 568)]
 		DistantScenery.Setting.QUARRY:
@@ -39,15 +41,21 @@ func _stacks() -> Array[Vector2]:
 
 func _process(delta: float) -> void:
 	_mill_angle += (0.25 + Weather.wind * 0.9) * delta
+	var industry := setting == DistantScenery.Setting.INDUSTRY
+	var amount := VFX.v("smoke")
 	for s in _stacks():
-		var industry := setting == DistantScenery.Setting.INDUSTRY
-		if randf() < delta * (7.0 if industry else 2.0):
-			_smoke.append({"p": s, "r": randf_range(5, 9) if industry else randf_range(2, 4), "a": randf_range(0.25, 0.4) if industry else 0.12, "age": 0.0})
+		if randf() < delta * (10.0 if industry else 3.0) * amount:
+			_smoke.append({"p": s + Vector2(randf_range(-2, 2), 0), "r": randf_range(4, 6) if industry else 2.5, "a": randf_range(0.3, 0.45) if industry else 0.16,
+				"age": 0.0, "life": randf_range(7.0, 11.0), "rise": randf_range(14, 22)})
 	for p in _smoke:
 		p.age += delta
-		p.r += (5.0 + p.age * 1.5) * delta
-		p.p += Vector2((-Weather.wind * 26.0 * (0.6 + 0.6 * Weather.gust) - 5.0) * delta, -maxf(2.0, 16.0 - p.age * 2.4) * delta)
-	_smoke = _smoke.filter(func(p): return p.age < 9.0)
+		var k: float = p.age / p.life
+		p.r += (3.0 + p.age * 1.6) * delta
+		# warm smoke rises fast, then the wind takes it and it drifts nearly level
+		var rise: float = p.rise * exp(-p.age * 0.35)
+		var drift := -Weather.wind * 30.0 * (0.4 + 0.8 * Weather.gust_at(float(p.p.x) * 3.0)) * minf(1.0, p.age * 0.5)
+		p.p += Vector2(drift + sin(Weather.time * 0.7 + float(p.r)) * 2.0 * k, -rise) * delta
+	_smoke = _smoke.filter(func(p): return p.age < p.life)
 	_geese_wait -= delta
 	if _geese_x > -300.0:
 		_geese_x -= (60.0 + Weather.wind * 40.0) * delta
@@ -72,7 +80,7 @@ func _hill_y(x: float) -> float:
 func _draw() -> void:
 	var cam := GameCamera.view_rect.position.x * scroll_scale
 	var w := GameCamera.view_rect.size.x
-	var col := Color(0, 0, 0, haze)
+	var col := Color(tint * (0.3 + 0.7 * Daylight.light()) * VFX.v("haze"), 1.0)
 	var hill := PackedVector2Array([Vector2(cam - 10, 680)])
 	var x := cam - 10.0
 	while x <= cam + w + 20.0:
@@ -89,7 +97,9 @@ func _draw() -> void:
 			_draw_quarry(cam, w, col)
 	for p in _smoke:
 		var pr: float = p.r
-		draw_texture_rect(_puff, Rect2(p.p - Vector2(pr, pr), Vector2(pr, pr) * 2.0), false, Color(1, 1, 1, p.a * (1.0 - p.age / 9.0) * 0.9))
+		var k: float = p.age / p.life
+		var fade := smoothstep(0.0, 0.08, k) * (1.0 - k)
+		draw_texture_rect(_puff, Rect2(p.p - Vector2(pr, pr), Vector2(pr, pr) * 2.0), false, Color(col, p.a * fade * 1.4))
 	_draw_windows(cam, w)
 	if _geese_x > -300.0:
 		for i in 9:
@@ -97,7 +107,7 @@ func _draw() -> void:
 			var side := 1.0 if i % 2 == 1 else -1.0
 			var gp := Vector2(cam + _geese_x + row * 13.0, _geese_y + side * row * 9.0)
 			var flap := sin(Weather.time * 9.0 + i) * 3.0
-			draw_polyline(PackedVector2Array([gp + Vector2(-4, -flap), gp, gp + Vector2(4, -flap)]), Color(0, 0, 0, 0.7), 1.3)
+			draw_polyline(PackedVector2Array([gp + Vector2(-4, -flap), gp, gp + Vector2(4, -flap)]), col, 1.3)
 
 
 ## Little warm windows that come on as it gets dark.
@@ -160,36 +170,43 @@ func _draw_fields(cam: float, w: float, col: Color) -> void:
 
 
 func _draw_industry(cam: float, w: float, col: Color) -> void:
+	# every building stands on the hill line and reaches below it, so nothing floats
 	var f := 900.0
-	for r: Rect2 in [Rect2(f, 520, 190, 100), Rect2(f + 40, 488, 60, 40), Rect2(f + 140, 500, 70, 30), Rect2(f + 520, 530, 260, 90), Rect2(f + 1180, 510, 160, 110)]:
-		if r.end.x > cam - 50.0 and r.position.x < cam + w + 50.0:
-			draw_rect(r, col)
-			# saw-tooth roof
-			var x := r.position.x
-			while x < r.end.x - 10.0:
-				draw_colored_polygon(PackedVector2Array([Vector2(x, r.position.y), Vector2(x + 16, r.position.y - 9), Vector2(x + 16, r.position.y)]), col)
+	var blocks := [Vector3(f - 10, 200, 92), Vector3(f + 40, 60, 132), Vector3(f + 140, 70, 112), Vector3(f + 520, 260, 84),
+		Vector3(f + 1180, 160, 104), Vector3(f + 1360, 90, 70)]
+	for b: Vector3 in blocks:
+		if b.x + b.y < cam - 50.0 or b.x > cam + w + 50.0:
+			continue
+		var base := maxf(_hill_y(b.x), _hill_y(b.x + b.y)) + 30.0
+		var top := minf(_hill_y(b.x), _hill_y(b.x + b.y)) - b.z
+		draw_rect(Rect2(b.x, top, b.y, base - top), col)
+		# saw-tooth roof on the long halls
+		if b.y > 150.0:
+			var x := b.x
+			while x < b.x + b.y - 10.0:
+				draw_colored_polygon(PackedVector2Array([Vector2(x, top + 0.5), Vector2(x + 16, top - 9), Vector2(x + 16, top + 0.5)]), col)
 				x += 18.0
 	for s in _stacks():
-		draw_rect(Rect2(s.x - 5, s.y, 10, 610 - s.y), col)
+		var base := _hill_y(s.x) + 20.0
+		draw_rect(Rect2(s.x - 5, s.y, 10, base - s.y), col)
 		draw_rect(Rect2(s.x - 6.5, s.y, 13, 3), col)
-	# a gas holder: a lattice drum
+	# a gas holder: a drum inside a lattice frame
 	var gx := 1600.0
 	if gx > cam - 150.0 and gx < cam + w + 150.0:
+		var gb := _hill_y(gx) + 20.0
+		draw_rect(Rect2(gx - 56, gb - 104, 112, 104), col)
 		for k in 7:
 			var px := gx - 60.0 + k * 20.0
-			draw_line(Vector2(px, 610), Vector2(px, 470), col, 1.4)
-		for k in 5:
-			var y := 610.0 - k * 34.0
+			draw_line(Vector2(px, gb), Vector2(px, gb - 150), col, 1.4)
+		for k in 4:
+			var y := gb - 150.0 + k * 15.0
 			draw_line(Vector2(gx - 60, y), Vector2(gx + 60, y), col, 1.0)
-			if k < 4:
-				for j in 6:
-					draw_line(Vector2(gx - 60 + j * 20, y), Vector2(gx - 40 + j * 20, y - 34), col, 0.7)
-		draw_rect(Rect2(gx - 56, 520, 112, 90), col)
 	# tower cranes
 	for cx: float in [560.0, 2050.0]:
 		if cx < cam - 200.0 or cx > cam + w + 200.0:
 			continue
-		draw_line(Vector2(cx, 610), Vector2(cx, 400), col, 3.0)
+		var gb := _hill_y(cx) + 10.0
+		draw_line(Vector2(cx, gb), Vector2(cx, 400), col, 3.0)
 		draw_line(Vector2(cx - 50, 404), Vector2(cx + 140, 404), col, 2.4)
 		draw_line(Vector2(cx, 384), Vector2(cx - 50, 404), col, 1.2)
 		draw_line(Vector2(cx, 384), Vector2(cx + 140, 404), col, 1.2)
@@ -224,9 +241,9 @@ func _draw_quarry(cam: float, w: float, col: Color) -> void:
 
 func _make_puff() -> Texture2D:
 	var g := Gradient.new()
-	g.set_color(0, Color(0, 0, 0, 1))
-	g.set_color(1, Color(0, 0, 0, 0))
-	g.add_point(0.55, Color(0, 0, 0, 0.55))
+	g.set_color(0, Color(1, 1, 1, 1))
+	g.set_color(1, Color(1, 1, 1, 0))
+	g.add_point(0.55, Color(1, 1, 1, 0.55))
 	var t := GradientTexture2D.new()
 	t.gradient = g
 	t.fill = GradientTexture2D.FILL_RADIAL

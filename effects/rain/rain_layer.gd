@@ -49,7 +49,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	var view := GameCamera.view_rect
 	global_position = view.position
-	visible_drops = clampi(int(drops_per_storm * Weather.storm), 0, max_drops)
+	visible_drops = clampi(int(drops_per_storm * Weather.storm * VFX.v("rain")), 0, max_drops)
 	_mm.visible_instance_count = visible_drops
 	_mat.set_shader_parameter("view_size", view.size)
 	_mat.set_shader_parameter("weather_time", Weather.time)
@@ -61,6 +61,14 @@ func _process(_delta: float) -> void:
 	_mat.set_shader_parameter("flash", Weather.flash)
 	_mat.set_shader_parameter("opacity", opacity)
 	_mat.set_shader_parameter("light", Daylight.light())
+	_mat.set_shader_parameter("gusts", VFX.v("rain_gusts"))
+	_mat.set_shader_parameter("gust_strength", Weather.gust * Weather.wind)
+	var near := depth_min >= 0.4
+	if Game.instance and near:
+		_mat.set_shader_parameter("occluders", Game.instance.occluders.get_texture())
+		_mat.set_shader_parameter("shelter", 1.0 if VFX.on("rain_shelter") else 0.0)
+	else:
+		_mat.set_shader_parameter("shelter", 0.0)
 	var ground := Level.current.ground_y if Level.current else 635.0
 	_mat.set_shader_parameter("ground_y", ground - view.position.y)
 	var lamps := PackedVector3Array()

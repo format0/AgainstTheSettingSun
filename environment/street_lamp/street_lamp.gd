@@ -56,6 +56,7 @@ func _ready() -> void:
 	mat.shader = preload("res://environment/street_lamp/lamp_light.gdshader")
 	_light.material = mat
 	add_child(_light)
+	Game.no_occlude(_light)
 	_layout_light()
 	_moths = MothSwarm.new()
 	_moths.lamp = self
@@ -76,8 +77,8 @@ func _layout_light() -> void:
 	for b in bulbs:
 		left = minf(left, b.x)
 		right = maxf(right, b.x)
-	var pos := Vector2(left - 120.0, -45.0)
-	var size := Vector2(right - left + 240.0, post_height + 70.0)
+	var pos := Vector2(left - 130.0, -120.0)
+	var size := Vector2(right - left + 260.0, post_height + 145.0)
 	_light.position = pos
 	_light.size = size
 	var mat := _light.material as ShaderMaterial
@@ -104,7 +105,7 @@ func _process(delta: float) -> void:
 			data.append(Vector4.ZERO)
 	mat.set_shader_parameter("bulbs", data)
 	mat.set_shader_parameter("world_x", global_position.x)
-	mat.set_shader_parameter("fog", 0.5 + 0.5 * clampf(Weather.storm, 0.0, 1.0))
+	mat.set_shader_parameter("fog", (0.5 + 0.5 * clampf(Weather.storm, 0.0, 1.0)) * VFX.v("lamp_glow"))
 	if _buzz:
 		_buzz.volume_db = linear_to_db(maxf(intensity, 0.001)) - 14.0
 	queue_redraw()

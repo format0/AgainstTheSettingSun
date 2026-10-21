@@ -36,6 +36,7 @@ func _ready() -> void:
 	_mat.set_shader_parameter("color", Color(1.0, 0.7, 0.35))
 	_mat.set_shader_parameter("radius", light_radius)
 	_light.material = _mat
+	Game.no_occlude(_light)
 	var s := light_radius * 3.0
 	_light.size = Vector2(s, s)
 	_mat.set_shader_parameter("rect_size", _light.size)
@@ -67,7 +68,7 @@ func _process(delta: float) -> void:
 	intensity = lerpf(intensity, goal, delta * 6.0)
 	var lp := _lamp_pos()
 	_light.position = lp - _light.size * 0.5
-	_mat.set_shader_parameter("intensity", intensity * (1.0 + (1.0 - Daylight.light()) * 0.5))
+	_mat.set_shader_parameter("intensity", intensity * (1.0 + (1.0 - Daylight.light()) * 0.5) * VFX.v("lamp_glow"))
 	_mat.set_shader_parameter("weather_time", Weather.time)
 	queue_redraw()
 

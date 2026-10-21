@@ -65,12 +65,20 @@ func _fade(alpha: float, seconds: float) -> void:
 
 ## Level number and name, fading in over the opening and out again.
 func show_title(title: String, subtitle: String) -> void:
+	_title.add_theme_font_size_override("font_size", 46)
 	_title.text = title
 	_subtitle.text = subtitle.to_lower()
 	_animate_text(1.2, 3.2, 2.0)
 
 
-## A line of text that stays until the scene changes.
+func clear_text() -> void:
+	if _tween_text:
+		_tween_text.kill()
+	_title.modulate.a = 0.0
+	_subtitle.modulate.a = 0.0
+
+
+## A line of text that stays until the next level is loaded.
 func show_message(text: String, subtitle := "") -> void:
 	_title.add_theme_font_size_override("font_size", 30)
 	_title.text = text

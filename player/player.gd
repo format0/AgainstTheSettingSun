@@ -193,12 +193,18 @@ func _on_landed(fall_speed: float) -> void:
 	_play_step(wet, 1.0 + fall_speed / 600.0)
 	if fall_speed > 380.0:
 		make_noise(global_position, 160.0 + fall_speed * 0.3)
+	else:
+		make_noise(global_position, 70.0)
 
 
 func _on_footstep() -> void:
 	var wet := Puddle.is_wet_at(global_position)
 	get_tree().call_group("splash_emitters", "burst", global_position - Vector2(facing * 6, 0), 8 if wet else 3, 1.0 if wet else 0.6)
 	_play_step(wet, 1.0)
+	# footsteps carry a little way (things under the ground listen)
+	for e in get_tree().get_nodes_in_group("enemies"):
+		if e is Burrower:
+			e.hear(global_position)
 
 
 func _play_step(wet: bool, loudness: float) -> void:

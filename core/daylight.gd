@@ -9,7 +9,7 @@ static var progress := 0.0
 
 ## Remaining daylight, 1..0. Stays high for a long time and falls off at the end.
 static func light() -> float:
-	return 1.0 - smoothstep(0.25, 1.0, progress) * 0.94
+	return 1.0 - smoothstep(0.35, 1.0, progress) * 0.94
 
 
 ## 0..1: how close the end is (used for the closing vignette and the heartbeat).

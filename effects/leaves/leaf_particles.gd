@@ -20,6 +20,7 @@ static func texture() -> Texture2D:
 ## Leaves falling from an area of `extents` around the emitter.
 static func make(extents: Vector2, amount: int) -> GPUParticles2D:
 	var fx := GPUParticles2D.new()
+	Game.no_occlude(fx)
 	fx.texture = texture()
 	fx.amount = amount
 	fx.lifetime = 7.0
@@ -53,4 +54,4 @@ static func make(extents: Vector2, amount: int) -> GPUParticles2D:
 static func blow(fx: GPUParticles2D, world_x: float, rate := 0.8) -> void:
 	var pm := fx.process_material as ParticleProcessMaterial
 	pm.gravity = Vector3(-Weather.wind * 170.0 * (0.5 + 0.7 * Weather.gust_at(world_x)), 35.0, 0.0)
-	fx.amount_ratio = clampf(Weather.wind * maxf(Weather.storm, 0.3) * rate, 0.05, 1.0)
+	fx.amount_ratio = clampf(Weather.wind * maxf(Weather.storm, 0.3) * rate * VFX.v("leaves"), 0.0, 1.0)

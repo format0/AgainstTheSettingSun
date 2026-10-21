@@ -21,6 +21,7 @@ var _inside := {}
 
 
 func _ready() -> void:
+	Game.no_occlude(self)
 	add_to_group("water")
 	z_index = Layers.WATER
 	if Engine.is_editor_hint():

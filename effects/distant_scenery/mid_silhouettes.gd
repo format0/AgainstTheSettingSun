@@ -5,7 +5,8 @@ extends Node2D
 ## quarry. Trees sway in the wind.
 
 @export var scroll_scale := 0.5
-@export var haze := 0.26
+## The colour of the nearer haze (multiplied by the remaining daylight).
+@export var tint := Color(0.09, 0.036, 0.03)
 @export var setting := DistantScenery.Setting.INDUSTRY
 @export var pylon_x := PackedFloat32Array([260, 820, 1380, 1940])
 @export var mast_x := 1180.0
@@ -30,7 +31,7 @@ func _process(_delta: float) -> void:
 func _draw() -> void:
 	var cam := GameCamera.view_rect.position.x * scroll_scale
 	var w := GameCamera.view_rect.size.x
-	var col := Color(0, 0, 0, 1.0 - haze)
+	var col := Color(tint * (0.3 + 0.7 * Daylight.light()) * VFX.v("haze"), 1.0)
 	match setting:
 		DistantScenery.Setting.FIELDS:
 			_poplars(cam, w, col, 1.0)
@@ -43,7 +44,8 @@ func _draw() -> void:
 		DistantScenery.Setting.QUARRY:
 			_firs(cam, w, col)
 			_needles(cam, w, col)
-	draw_rect(Rect2(cam - 20, 624, w + 60, 20), col)
+	# the land runs on below the horizon, so gaps in the near ground (a creek, a pit) show it, not sky
+	draw_rect(Rect2(cam - 20, 624, w + 60, 260), col)
 
 
 func _poplars(cam: float, w: float, col: Color, share: float) -> void:
@@ -85,12 +87,29 @@ func _firs(cam: float, w: float, col: Color) -> void:
 
 
 func _needles(cam: float, w: float, col: Color) -> void:
+	# weathered crags standing out of the forest: broad at the foot, broken along the top
 	for nx: float in [300.0, 760.0, 1250.0, 1900.0, 2400.0]:
-		if nx < cam - 120.0 or nx > cam + w + 120.0:
+		if nx < cam - 160.0 or nx > cam + w + 160.0:
 			continue
-		var h := 150.0 + fmod(nx, 70.0)
-		draw_colored_polygon(PackedVector2Array([Vector2(nx - 40, 630), Vector2(nx - 24, 630 - h * 0.5), Vector2(nx - 12, 630 - h * 0.9),
-			Vector2(nx, 630 - h), Vector2(nx + 9, 630 - h * 0.8), Vector2(nx + 22, 630 - h * 0.45), Vector2(nx + 46, 630)]), col)
+		var h := 70.0 + fmod(nx * 0.37, 60.0)
+		var half := 70.0 + fmod(nx * 0.53, 50.0)
+		var pts := PackedVector2Array([Vector2(nx - half, 630)])
+		var n := 14
+		for i in range(1, n):
+			var u := float(i) / n
+			var x := lerpf(-half, half, u)
+			var body := pow(sin(u * PI), 0.7) * h
+			var crag := (sin(u * 23.0 + nx) * 0.5 + sin(u * 51.0 + nx * 0.3) * 0.3) * 9.0 * sin(u * PI)
+			pts.append(Vector2(nx + x, 630.0 - body - crag))
+		pts.append(Vector2(nx + half, 630))
+		draw_colored_polygon(pts, col)
+		# a few firs clinging to the top
+		for k in 3:
+			var fx := nx + (fmod(nx * (k + 1) * 0.31, 1.0) - 0.5) * half
+			var fu := (fx - nx + half) / (2.0 * half)
+			var fy := 630.0 - pow(sin(fu * PI), 0.7) * h + 3.0
+			var fh := 16.0 + k * 5.0
+			draw_colored_polygon(PackedVector2Array([Vector2(fx - fh * 0.28, fy), Vector2(fx, fy - fh), Vector2(fx + fh * 0.28, fy)]), col)
 
 
 func _barn(bx: float, cam: float, w: float, col: Color) -> void:

@@ -31,7 +31,7 @@ func _process(_delta: float) -> void:
 	global_position = view.position
 	_rect.size = view.size
 	var ground := Level.current.ground_y if Level.current else 635.0
-	var amount := density * (0.7 + 0.45 * minf(Weather.storm, 1.6))
+	var amount := density * (0.7 + 0.45 * minf(Weather.storm, 1.6)) * VFX.v("fog" if mode == Mode.BANK else "ground_fog")
 	_mat.set_shader_parameter("view_size", view.size)
 	_mat.set_shader_parameter("mode", float(mode))
 	_mat.set_shader_parameter("density", amount)
