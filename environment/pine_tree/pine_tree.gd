@@ -25,6 +25,16 @@ var _boughs: Array[Dictionary] = []
 ## Dead twigs low on the trunk: [u, side, length].
 var _twigs: Array[Vector3] = []
 
+# The shapes never change, only where they are: each piece is recorded once into a canvas
+# item and every frame only its transform is set (see _pose).
+var _parts: CanvasParts
+var _trunk_segs: Array[RID] = []
+var _trunk_caps: Array[RID] = []
+var _bough_items: Array[RID] = []
+var _twig_items: Array[RID] = []
+var _leader: RID
+var _bounds := Rect2()
+
 
 func _ready() -> void:
 	_grow()
@@ -48,7 +58,7 @@ func _grow() -> void:
 				"phase": rng.randf() * TAU})
 	for i in rng.randi_range(2, 4):
 		_twigs.append(Vector3(rng.randf_range(0.06, 0.22), -1.0 if rng.randf() < 0.5 else 1.0, rng.randf_range(10, 24)))
-	queue_redraw()
+	_build_parts()
 
 
 func _bough(rng: RandomNumberGenerator, length: float, thick: float) -> PackedVector2Array:
@@ -73,9 +83,55 @@ func _bough(rng: RandomNumberGenerator, length: float, thick: float) -> PackedVe
 	return top + bottom
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE and _parts:
+		_parts.clear()
+
+
+## Record the trunk segments, joints, boughs, twigs and the leader once; only their
+## transforms change as the tree sways.
+func _build_parts() -> void:
+	if not is_inside_tree():
+		return
+	if _parts == null:
+		_parts = CanvasParts.new(self)
+	_parts.clear()
+	_trunk_segs.clear()
+	_trunk_caps.clear()
+	_bough_items.clear()
+	_twig_items.clear()
+	for i in 8:
+		var w0 := lerpf(7.0, 1.5, i / 8.0)
+		var w1 := lerpf(7.0, 1.5, (i + 1) / 8.0)
+		var rid := _parts.add()
+		RenderingServer.canvas_item_add_polygon(rid, PackedVector2Array([Vector2(0, w0 * 0.5), Vector2(1, w1 * 0.5), Vector2(1, -w1 * 0.5), Vector2(0, -w0 * 0.5)]), PackedColorArray([Color.BLACK]))
+		_trunk_segs.append(rid)
+	for i in 9:
+		var rid := _parts.add()
+		RenderingServer.canvas_item_add_circle(rid, Vector2.ZERO, lerpf(7.0, 1.5, i / 8.0) * 0.5, Color.BLACK)
+		_trunk_caps.append(rid)
+	for tw in _twigs:
+		var rid := _parts.add()
+		var tip := Vector2(tw.y * tw.z, tw.z * 0.35)
+		RenderingServer.canvas_item_add_line(rid, Vector2.ZERO, tip, Color.BLACK, 1.4)
+		RenderingServer.canvas_item_add_line(rid, tip * 0.55, tip * 0.55 + Vector2(tw.y * 5.0, 4.0), Color.BLACK, 1.0)
+		_twig_items.append(rid)
+	for b in _boughs:
+		var rid := _parts.add()
+		CanvasParts.add_polygon(rid, b.poly)
+		_bough_items.append(rid)
+	_leader = _parts.add()
+	CanvasParts.add_polygon(_leader, PackedVector2Array([Vector2(0, -10), Vector2(4, 4), Vector2(6, 12), Vector2(-6, 12), Vector2(-4, 4)]))
+	_bounds = Rect2(-height * 0.4, -height - 20.0, height * 0.8, height + 30.0)
+	_pose()
+
+
 func _process(_delta: float) -> void:
-	if not Engine.is_editor_hint():
-		queue_redraw()
+	if Engine.is_editor_hint() or _parts == null:
+		return
+	_parts.sync_layers()
+	if CanvasParts.on_screen(self, _bounds):
+		_pose()
 
 
 func _bend(u: float) -> Vector2:
@@ -84,31 +140,27 @@ func _bend(u: float) -> Vector2:
 	return Vector2(sway * u * u, 0)
 
 
-func _draw() -> void:
-	var c := Color.BLACK
+## The trunk bends (more towards the top), the boughs ride on it, lift on the windward side,
+## droop on the leeward side and flutter at the tips.
+func _pose() -> void:
 	var pts := PackedVector2Array()
 	for i in 9:
 		var u := i / 8.0
 		pts.append(Vector2(0, -height * u) + _bend(u))
 	for i in 8:
-		var u0 := i / 8.0
-		DrawKit.limb(self, pts[i], pts[i + 1], lerpf(7.0, 1.5, u0), lerpf(7.0, 1.5, u0 + 0.125))
-	for tw in _twigs:
-		var base := Vector2(0, -height * tw.x) + _bend(tw.x)
-		var tip := base + Vector2(tw.y * tw.z, tw.z * 0.35)
-		draw_line(base, tip, c, 1.4)
-		draw_line(base.lerp(tip, 0.55), base.lerp(tip, 0.55) + Vector2(tw.y * 5.0, 4.0), c, 1.0)
+		var d := pts[i + 1] - pts[i]
+		RenderingServer.canvas_item_set_transform(_trunk_segs[i], Transform2D(d, d.normalized().orthogonal(), pts[i]))
+	for i in 9:
+		RenderingServer.canvas_item_set_transform(_trunk_caps[i], Transform2D(0.0, pts[i]))
+	for i in _twigs.size():
+		RenderingServer.canvas_item_set_transform(_twig_items[i], Transform2D(0.0, Vector2(0, -height * _twigs[i].x) + _bend(_twigs[i].x)))
 	var wind := Weather.wind
-	for b in _boughs:
+	var gust := Weather.gust_at(global_position.x)
+	for i in _boughs.size():
+		var b := _boughs[i]
 		var u: float = b.u
 		var side: float = b.side
-		var base := Vector2(0, -height * u) + _bend(u)
-		# leeward boughs droop, windward ones lift; the tips flutter
-		var lift := -wind * 0.12 * side * (0.5 + Weather.gust_at(global_position.x))
+		var lift := -wind * 0.12 * side * (0.5 + gust)
 		var flutter := sin(Weather.time * 4.0 + b.phase) * wind * 0.05
-		draw_set_transform(base, (lift + flutter) * side, Vector2(side, 1.0))
-		draw_colored_polygon(b.poly, c)
-	draw_set_transform(Vector2.ZERO)
-	# the leader at the top, with a last tuft
-	var tip := pts[8]
-	draw_colored_polygon(PackedVector2Array([tip + Vector2(0, -10), tip + Vector2(4, 4), tip + Vector2(6, 12), tip + Vector2(-6, 12), tip + Vector2(-4, 4)]), c)
+		RenderingServer.canvas_item_set_transform(_bough_items[i], Transform2D((lift + flutter) * side, Vector2(side, 1.0), 0.0, Vector2(0, -height * u) + _bend(u)))
+	RenderingServer.canvas_item_set_transform(_leader, Transform2D(0.0, pts[8]))
