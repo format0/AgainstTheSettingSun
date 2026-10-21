@@ -6,6 +6,11 @@ extends Node2D
 ## itself is a child with the rain shader.
 
 const OPENING := Rect2(170, 34, 1026, 556)
+## The candle and the vase are drawn this much larger than their sketches.
+const PROP_SCALE := 1.45
+## Where the cat sits on the sill, and how big it is (about a quarter of the window's height).
+const CAT_SEAT := Vector2(505, 586)
+const CAT_HEIGHT := 150.0
 
 var show_cat := true
 var show_vase := true
@@ -113,13 +118,15 @@ func _draw() -> void:
 	draw_rect(Rect2(o.position.x - 36, o.end.y - 4, o.size.x + 72, 18), c)
 	_draw_curtains(c, t)
 	if show_vase:
+		var vb := Vector2(OPENING.end.x - 110, OPENING.end.y - 4)
+		draw_set_transform(vb * (1.0 - PROP_SCALE), 0.0, Vector2.ONE * PROP_SCALE)
 		_draw_vase(c, t)
+	var cb := Vector2(OPENING.end.x - 190, OPENING.end.y - 4)
+	draw_set_transform(cb * (1.0 - PROP_SCALE), 0.0, Vector2.ONE * PROP_SCALE)
 	_draw_candle(c)
+	draw_set_transform(Vector2.ZERO)
 	if show_cat:
-		var seat := Vector2(OPENING.position.x + 250, OPENING.end.y - 4)
-		draw_set_transform(seat * (1.0 - 1.3), 0.0, Vector2(1.3, 1.3))
 		_draw_cat(c, t)
-		draw_set_transform(Vector2.ZERO)
 
 
 func _draw_curtains(c: Color, t: float) -> void:
@@ -161,7 +168,7 @@ func _draw_curtains(c: Color, t: float) -> void:
 
 
 func _draw_vase(c: Color, t: float) -> void:
-	var base := Vector2(OPENING.end.x - 120, OPENING.end.y - 4)
+	var base := Vector2(OPENING.end.x - 110, OPENING.end.y - 4)
 	draw_colored_polygon(PackedVector2Array([base + Vector2(-9, 0), base + Vector2(-11, -14), base + Vector2(-7, -24), base + Vector2(-4, -30),
 		base + Vector2(4, -30), base + Vector2(7, -24), base + Vector2(11, -14), base + Vector2(9, 0)]), c)
 	for s in _stems:
@@ -173,7 +180,7 @@ func _draw_vase(c: Color, t: float) -> void:
 
 
 func _candle_tip() -> Vector2:
-	return Vector2(OPENING.end.x - 190, OPENING.end.y - 4 - 66)
+	return Vector2(OPENING.end.x - 190, OPENING.end.y - 4 - 66 * PROP_SCALE)
 
 
 func _draw_candle(c: Color) -> void:
@@ -190,37 +197,81 @@ func _draw_candle(c: Color) -> void:
 
 
 func _draw_cat(c: Color, t: float) -> void:
-	# a cat sitting on the sill with its back to us, watching the rain
-	var b := Vector2(OPENING.position.x + 250, OPENING.end.y - 4)
-	var crouch := _flinch * 4.0
+	# a cat sitting on the sill with its back to us, watching the rain: broad haunches,
+	# narrow shoulders, a round head with fur at the cheeks, ears that turn and flatten
+	var k := CAT_HEIGHT / 150.0
+	var b := CAT_SEAT
+	var crouch := _flinch * 6.0
+	var breathe := 1.0 + 0.012 * sin(t * 1.6)
+	# the body, one side mirrored onto the other through a smooth curve
+	var side := [Vector2(0, 0), Vector2(40, 0), Vector2(46, -8), Vector2(47, -22), Vector2(42, -38), Vector2(33, -54),
+		Vector2(27, -70), Vector2(25, -84), Vector2(21, -96), Vector2(14, -104), Vector2(0, -106)]
+	var right := _smooth(side, 4)
 	var body := PackedVector2Array()
-	for i in 21:
-		var a := PI + float(i) / 20.0 * PI
-		var r := Vector2(22, 34 - crouch)
-		var p := Vector2(cos(a) * r.x * (1.0 + 0.15 * sin(a * 2.0)), sin(a) * r.y)
-		p.x *= 1.0 - 0.25 * smoothstep(-0.2, -1.0, sin(a))   # narrower at the shoulders
-		body.append(b + p)
+	for i in range(right.size() - 1, -1, -1):
+		var p: Vector2 = right[i]
+		body.append(b + Vector2(-p.x * breathe, p.y + (crouch if p.y < -40.0 else 0.0)) * k)
+	for p: Vector2 in right:
+		body.append(b + Vector2(p.x * breathe, p.y + (crouch if p.y < -40.0 else 0.0)) * k)
 	draw_colored_polygon(body, c)
-	var head := b + Vector2(_look * 4.0, -40 + crouch * 1.4)
-	DrawKit.ellipse(self, head, Vector2(13, 11), _look * 0.15, c, 16)
-	# ears, flattened when the thunder comes
-	var flat := _flinch
-	for side: float in [-1.0, 1.0]:
-		var twitch := _ear_twitch * 0.25 if side > 0 else 0.0
-		var a := -PI * 0.5 + side * (0.45 + flat * 0.9) + twitch
-		var root := head + Vector2(side * 7.0, -6)
-		var tip := root + Vector2.from_angle(a) * (11.0 - flat * 4.0)
-		draw_colored_polygon(PackedVector2Array([root + Vector2(-side * 5.0, 2), tip, root + Vector2(side * 4.0, 3)]), c)
-	# the tail along the sill and over its edge, the tip twitching
+	# the head, turning a little now and then; fur sticking out at the cheeks
+	var head := b + Vector2(_look * 7.0, -118.0 + crouch * 1.6) * k
+	var hp := PackedVector2Array()
+	for i in 28:
+		var a := float(i) / 28.0 * TAU
+		var r := Vector2(27, 23) * k
+		var p := Vector2(cos(a) * r.x, sin(a) * r.y)
+		if sin(a) > 0.1:
+			p.x *= 1.0 + 0.12 * sin(a)        # wider at the jaw
+			if absf(cos(a)) > 0.55 and i % 2 == 0:
+				p += Vector2(signf(cos(a)) * 3.5, 1.5) * k   # cheek tufts
+		hp.append(head + p.rotated(_look * 0.12))
+	draw_colored_polygon(hp, c)
+	# ears: curved, a tuft at the tip; flattened sideways when the thunder comes
+	for s: float in [-1.0, 1.0]:
+		var twitch := _ear_twitch * 0.3 if s > 0.0 else 0.0
+		var a := -PI * 0.5 + s * (0.32 + _flinch * 1.0) + twitch
+		var root := head + Vector2(s * 13.0, -12.0) * k
+		var dir := Vector2.from_angle(a)
+		var length := (26.0 - _flinch * 9.0) * k
+		var tip := root + dir * length
+		var across := dir.orthogonal() * s
+		var ear := PackedVector2Array([root - across * 11.0 * k, root.lerp(tip, 0.55) - across * 6.5 * k + dir * 1.0, tip,
+			root.lerp(tip, 0.6) + across * 3.0 * k, root + across * 7.0 * k])
+		draw_colored_polygon(ear, c)
+		draw_line(tip, tip + dir * 4.0 * k, c, 1.0)
+	# the tail: wrapped along the sill, the tip lifting against the glass and twitching
+	var swish := sin(t * 1.1) * 0.5 + sin(t * 2.9) * 0.25
 	var tail := PackedVector2Array()
-	var swish := sin(t * 1.3) * 0.5 + sin(t * 3.1) * 0.2
-	for i in 12:
-		var u := float(i) / 11.0
-		var p := b + Vector2(18 + u * 34, -2 + u * u * 18)
-		p.x += sin(u * 3.0 + swish) * u * 6.0
+	var widths := PackedFloat32Array()
+	var n := 18
+	for i in n:
+		var u := float(i) / (n - 1)
+		var lift := smoothstep(0.55, 1.0, u)
+		var p := b + Vector2(34.0 + u * 64.0 - lift * lift * 16.0, -4.0 - lift * 34.0) * k
+		p += Vector2(sin(swish * 2.0) * 7.0, -absf(swish) * 3.0) * lift * lift * k
 		tail.append(p)
-	draw_polyline(tail, c, 5.0)
-	draw_circle(tail[tail.size() - 1], 2.6, c)
+		widths.append(lerpf(13.0, 6.0, u) * k)
+	for i in n - 1:
+		DrawKit.limb(self, tail[i], tail[i + 1], widths[i], widths[i + 1])
+	draw_circle(tail[n - 1], widths[n - 1] * 0.5, c)
+
+
+## A smooth curve through some points (Catmull-Rom), `steps` points per span.
+func _smooth(pts: Array, steps: int) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	for i in pts.size() - 1:
+		var p0: Vector2 = pts[maxi(i - 1, 0)]
+		var p1: Vector2 = pts[i]
+		var p2: Vector2 = pts[i + 1]
+		var p3: Vector2 = pts[mini(i + 2, pts.size() - 1)]
+		for j in steps:
+			var u := float(j) / steps
+			var u2 := u * u
+			var u3 := u2 * u
+			out.append(0.5 * ((2.0 * p1) + (-p0 + p2) * u + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * u2 + (-p0 + 3.0 * p1 - 3.0 * p2 + p3) * u3))
+	out.append(pts[pts.size() - 1])
+	return out
 
 
 func _draw_glow() -> void:
