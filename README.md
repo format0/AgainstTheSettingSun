@@ -7,6 +7,11 @@ shooting: sneaking, running, hiding in the shadows and solving old machinery.
 Everything in the world is drawn by code as a black silhouette; there are no image files
 for the levels. The only picture in the project is the runner's animation sheet.
 
+The game opens on the title screen (`title/title_screen.tscn`): a dark room, a window
+streaming with rain, the fields under a low sun beyond it. Choose with the arrows, begin with
+Space. **Esc** in a level returns there. Chapters you have reached are remembered. The cat and the
+vase on the sill can be switched off on the TitleScreen node (`show_cat`, `show_vase`).
+
 **Controls:** ← → run, ↑ jump, **Space** is the one action button (pull a lever, push a dead
 tree over, hold it to grab a crate and pull).
 

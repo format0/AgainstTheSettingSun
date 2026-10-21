@@ -36,7 +36,7 @@ wind_strength = 0.8
 
 [node name="Sky" type="CanvasLayer" parent="Effects"]
 script = ExtResource("3")
-sun_screen_position = Vector2(560, 592)
+sun_screen_position = Vector2(560, 582)
 cloud_cover = 0.43
 sun_parallax = 0
 
@@ -86,7 +86,7 @@ density = 0.8
 
 [node name="LightShafts" type="CanvasLayer" parent="Effects"]
 script = ExtResource("10")
-strength = 0.55
+strength = 0.8
 
 [node name="Ambience" type="Node" parent="Effects"]
 script = ExtResource("11")
@@ -190,4 +190,4 @@ height = 0.3
 
 [node name="Camera" type="Camera2D" parent="."]
 script = ExtResource("23")
-position = Vector2(0, 90)
+position = Vector2(0, 36)

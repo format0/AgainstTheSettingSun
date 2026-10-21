@@ -12,7 +12,7 @@ uniform float blur = 2.6;          // how far out of focus the world beyond is (
 uniform float focus = 0.0;         // 0 = focused on the glass, 1 = on the landscape
 uniform float refraction = 1.0;
 uniform float mist = 0.3;          // condensation
-uniform float drop_scale = 1.5;
+uniform float drop_scale = 1.1;
 
 float hash1(float n) { return fract(sin(n * 12.9898) * 43758.5453); }
 vec3 hash3(float p) {
@@ -71,7 +71,7 @@ vec2 drops(vec2 uv, float t, float l0, float l1, float l2) {
 void fragment() {
 	vec2 q = vec2(UV.x * rect_size.x / rect_size.y, 1. - UV.y) * drop_scale;
 	float t = time * .2;
-	float l0 = smoothstep(-.5, 1., rain) * 2.;
+	float l0 = smoothstep(-.5, 1., rain) * .8;
 	float l1 = smoothstep(.25, .75, rain);
 	float l2 = smoothstep(0., .5, rain);
 	vec2 c = drops(q, t, l0, l1, l2);

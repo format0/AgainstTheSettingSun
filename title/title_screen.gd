@@ -11,6 +11,9 @@ extends Node2D
 @export var sun_from := 0.04
 @export var sun_to := 0.3
 @export var sun_seconds := 300.0
+## The cat watching the rain and the vase of dried grasses on the sill.
+@export var show_cat := true
+@export var show_vase := true
 
 var _room: WindowRoom
 var _layer: CanvasLayer
@@ -38,6 +41,8 @@ func _ready() -> void:
 		return
 	var cam := get_tree().get_first_node_in_group("game_camera") as Node2D
 	_room = WindowRoom.new()
+	_room.show_cat = show_cat
+	_room.show_vase = show_vase
 	_room.position = cam.global_position if cam else Vector2.ZERO
 	add_child(_room)
 	Game.mark_occluders(self)

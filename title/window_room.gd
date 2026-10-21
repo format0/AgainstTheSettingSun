@@ -7,6 +7,9 @@ extends Node2D
 
 const OPENING := Rect2(170, 34, 1026, 556)
 
+var show_cat := true
+var show_vase := true
+
 var glass: ColorRect
 var _glass_mat: ShaderMaterial
 var _glow: Node2D
@@ -109,9 +112,14 @@ func _draw() -> void:
 	# the sill, a little proud of the wall
 	draw_rect(Rect2(o.position.x - 36, o.end.y - 4, o.size.x + 72, 18), c)
 	_draw_curtains(c, t)
-	_draw_vase(c, t)
+	if show_vase:
+		_draw_vase(c, t)
 	_draw_candle(c)
-	_draw_cat(c, t)
+	if show_cat:
+		var seat := Vector2(OPENING.position.x + 250, OPENING.end.y - 4)
+		draw_set_transform(seat * (1.0 - 1.3), 0.0, Vector2(1.3, 1.3))
+		_draw_cat(c, t)
+		draw_set_transform(Vector2.ZERO)
 
 
 func _draw_curtains(c: Color, t: float) -> void:
@@ -165,16 +173,20 @@ func _draw_vase(c: Color, t: float) -> void:
 
 
 func _candle_tip() -> Vector2:
-	return Vector2(OPENING.end.x - 190, OPENING.end.y - 4 - 44)
+	return Vector2(OPENING.end.x - 190, OPENING.end.y - 4 - 66)
 
 
 func _draw_candle(c: Color) -> void:
 	var base := Vector2(OPENING.end.x - 190, OPENING.end.y - 4)
-	# a saucer, the candle with a run of wax, the wick
-	draw_colored_polygon(PackedVector2Array([base + Vector2(-16, 0), base + Vector2(-13, -4), base + Vector2(13, -4), base + Vector2(16, 0)]), c)
-	draw_rect(Rect2(base + Vector2(-5, -42), Vector2(10, 40)), c)
-	draw_colored_polygon(PackedVector2Array([base + Vector2(4, -40), base + Vector2(7, -36), base + Vector2(6, -27), base + Vector2(4, -30)]), c)
-	draw_line(base + Vector2(0, -42), base + Vector2(0.5, -45), c, 1.2)
+	# a brass holder with a drip tray and a ring handle, a tall candle with runs of wax
+	draw_colored_polygon(PackedVector2Array([base + Vector2(-22, 0), base + Vector2(-19, -5), base + Vector2(19, -5), base + Vector2(22, 0)]), c)
+	draw_rect(Rect2(base + Vector2(-4, -12), Vector2(8, 8)), c)
+	draw_colored_polygon(PackedVector2Array([base + Vector2(-9, -12), base + Vector2(9, -12), base + Vector2(7, -16), base + Vector2(-7, -16)]), c)
+	draw_arc(base + Vector2(26, -6), 6.0, -PI * 0.5, PI * 0.9, 12, c, 2.4)
+	draw_rect(Rect2(base + Vector2(-6, -64), Vector2(12, 50)), c)
+	draw_colored_polygon(PackedVector2Array([base + Vector2(5, -62), base + Vector2(8.5, -56), base + Vector2(7.5, -40), base + Vector2(5, -44)]), c)
+	draw_colored_polygon(PackedVector2Array([base + Vector2(-6, -60), base + Vector2(-9, -52), base + Vector2(-8, -46), base + Vector2(-6, -50)]), c)
+	draw_line(base + Vector2(0, -64), base + Vector2(0.6, -68), c, 1.3)
 
 
 func _draw_cat(c: Color, t: float) -> void:
@@ -214,20 +226,28 @@ func _draw_cat(c: Color, t: float) -> void:
 func _draw_glow() -> void:
 	var tip := _candle_tip()
 	var f := _flame
-	# the flame: a dim blue root, a bright core, the tongue swaying in the draught
-	var sway := sin(Weather.time * 2.3) * 1.2 + sin(Weather.time * 7.0) * 0.5
+	# the flame: a bright core, the tongue swaying in the draught
+	var sway := sin(Weather.time * 2.3) * 1.5 + sin(Weather.time * 7.0) * 0.6
 	var flame := PackedVector2Array()
-	for i in 13:
-		var a := float(i) / 12.0 * TAU
-		var r := Vector2(3.4, 7.5 * f)
+	for i in 15:
+		var a := float(i) / 14.0 * TAU
+		var r := Vector2(4.6, 11.0 * f)
 		var p := Vector2(sin(a) * r.x, -cos(a) * r.y)
 		if p.y < 0.0:
-			p.x *= 1.0 + p.y / (r.y * 1.4)
+			p.x *= 1.0 + p.y / (r.y * 1.3)
 			p.x += sway * (-p.y / r.y)
-		flame.append(tip + Vector2(0, -7) + p)
-	_glow.draw_colored_polygon(flame, Color(1.0, 0.62, 0.25, 0.9))
-	_glow.draw_circle(tip + Vector2(0, -5), 2.2, Color(1.0, 0.95, 0.75, 1.0))
-	# its light on the sill, the bars and the cat
-	for k in 3:
-		var r := (40.0 + k * 70.0) * (0.95 + 0.05 * f)
-		_glow.draw_texture_rect(_puff, Rect2(tip - Vector2(r, r), Vector2(r, r) * 2.0), false, Color(1.0, 0.5, 0.18, (0.22 - k * 0.06) * f))
+		flame.append(tip + Vector2(0, -9) + p)
+	_glow.draw_colored_polygon(flame, Color(1.0, 0.6, 0.22, 0.95))
+	_glow.draw_circle(tip + Vector2(0, -7), 3.0, Color(1.0, 0.96, 0.8, 1.0))
+	# its light: a small halo, a wide warm pool on the sill and the wall below
+	for k in 4:
+		var r := (26.0 + k * 85.0) * (0.95 + 0.05 * f)
+		_glow.draw_texture_rect(_puff, Rect2(tip + Vector2(0, -6 + k * 18.0) - Vector2(r, r), Vector2(r, r) * 2.0), false,
+			Color(1.0, 0.48, 0.16, (0.34 - k * 0.07) * f))
+	# the front edge of the sill catches the light either side of the candle
+	var sill := OPENING.end.y - 4.0
+	for i in 16:
+		var u := float(i) / 15.0
+		var x := tip.x + (u - 0.5) * 240.0
+		var a := exp(-pow((u - 0.5) * 3.5, 2.0)) * 0.3 * f
+		_glow.draw_line(Vector2(x, sill + 0.5), Vector2(x + 15.0, sill + 0.5), Color(1.0, 0.55, 0.22, a), 1.2)
