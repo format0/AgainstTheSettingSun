@@ -269,3 +269,19 @@ func _draw() -> void:
 				var bend := -Weather.wind * 4.0 * (0.5 + Weather.gust_at(global_position.x + w.x))
 				draw_line(w + Vector2(k * 2 - 3, 0), w + Vector2(k * 2 - 3 + bend, -6.0 - (k * 5) % 7), Color.BLACK, 1.0)
 	_draw_cover_outline()
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(0, -size.y - gable, size.x, size.y + gable)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": Vector2(size.x, -size.y)}, {"id": "gable", "pos": Vector2(size.x * 0.5, -size.y - gable)}]
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	if id == "size":
+		size = Vector2(maxf(40.0, p.x), maxf(30.0, -p.y))
+	else:
+		gable = maxf(0.0, -p.y - size.y)

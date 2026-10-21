@@ -71,3 +71,16 @@ func _draw() -> void:
 		draw_set_transform(Vector2(k.x, k.y) + sway, sin(t * (3.0 + Weather.wind * 5.0) + k.w) * 0.03 * Weather.wind)
 		draw_colored_polygon(_leafy[i], c)
 	draw_set_transform(Vector2.ZERO)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-size.x * 0.5, -size.y, size.x, size.y)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": Vector2(size.x * 0.5, -size.y)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	size = Vector2(maxf(16.0, absf(p.x) * 2.0), maxf(10.0, -p.y))

@@ -133,3 +133,16 @@ func _draw() -> void:
 		var b := -Weather.wind * 3.0 * Weather.gust_at(global_position.x + x) + sin(Weather.time * 4.0 + k) * Weather.wind
 		draw_line(Vector2(x, 0), Vector2(x + b, -6.0 - (k * 7) % 10), c, 1.2)
 	draw_set_transform(Vector2.ZERO)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-70 * size, -52 * size, 140 * size, 54 * size)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": Vector2(70.0 * size, -52.0 * size)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	size = clampf(absf(p.x) / 70.0, 0.6, 1.6)

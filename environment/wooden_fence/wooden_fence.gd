@@ -70,3 +70,17 @@ func _draw() -> void:
 				var p := pts[k]
 				draw_line(p + Vector2(-2, -2), p + Vector2(2, 2), c, 0.9)
 				draw_line(p + Vector2(-2, 2), p + Vector2(2, -2), c, 0.9)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(0, -height, length, height)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": Vector2(length, -height), "props": ["length", "height"]}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	length = maxf(20.0, p.x)
+	height = maxf(10.0, -p.y)

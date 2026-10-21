@@ -1,12 +1,12 @@
 @tool
 extends RefCounted
-## Point handles for nodes that are shaped by a line of points: a Terrain (`points`) and a
-## Roof (`profile`). Drag a point to move it, click the small dot between two points to add
+## Point handles for nodes that are shaped by a line of points: a Terrain (`points`), a
+## Roof (`profile`) and RustyPipes (`path`). Drag a point to move it, click the small dot between two points to add
 ## one there, right-click a point to remove it. Hold Shift while dragging to snap to 8 px.
 ## A Level gets one handle, its spawn point (the Player is moved with it).
 ## Every change is one undo step.
 
-const KINDS := {"Terrain": "points", "Roof": "profile", "Level": "spawn_point"}
+const KINDS := {"Terrain": "points", "Roof": "profile", "RustyPipes": "path", "Level": "spawn_point"}
 const HANDLE := 6.0
 const PICK := 9.0
 
@@ -176,7 +176,7 @@ func input(event: InputEvent) -> bool:
 
 
 func _kind() -> String:
-	return {"points": "terrain", "profile": "roof", "spawn_point": "spawn"}[_prop]
+	return {"points": "terrain", "profile": "roof", "path": "pipe", "spawn_point": "spawn"}[_prop]
 
 
 func _pick_point(pts: PackedVector2Array, xf: Transform2D, at: Vector2) -> int:

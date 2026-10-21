@@ -12,7 +12,10 @@ extends Node2D
 		size = v
 		_layout()
 ## How far up its light reaches (it reveals the player inside this).
-@export var light_reach := 110.0
+@export var light_reach := 110.0:
+	set(v):
+		light_reach = v
+		_layout()
 @export var embers := true
 
 var _rect: ColorRect
@@ -32,17 +35,6 @@ func _ready() -> void:
 	add_to_group("light_sources")
 	add_to_group("lamps")
 	z_index = Layers.WATER
-	if Engine.is_editor_hint():
-		queue_redraw()
-		return
-	_haze = ColorRect.new()
-	_haze.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_haze_mat = ShaderMaterial.new()
-	_haze_mat.shader = preload("res://hazards/molten_pool/heat_haze.gdshader")
-	_haze.material = _haze_mat
-	_haze.z_as_relative = false
-	_haze.z_index = Layers.HAZARD_GLOW - 1
-	add_child(_haze)
 	_rect = ColorRect.new()
 	_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_mat = ShaderMaterial.new()
@@ -57,6 +49,18 @@ func _ready() -> void:
 	_glow.z_as_relative = false
 	_glow.z_index = Layers.HAZARD_GLOW
 	add_child(_glow)
+	if Engine.is_editor_hint():
+		_layout()
+		_editor_preview()
+		return
+	_haze = ColorRect.new()
+	_haze.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_haze_mat = ShaderMaterial.new()
+	_haze_mat.shader = preload("res://hazards/molten_pool/heat_haze.gdshader")
+	_haze.material = _haze_mat
+	_haze.z_as_relative = false
+	_haze.z_index = Layers.HAZARD_GLOW - 1
+	add_child(_haze)
 	if embers:
 		_embers = EmberParticles.make(Vector2(size.x * 0.5, 4), int(size.x / 6.0))
 		_embers.position = Vector2(size.x * 0.5, 2)
@@ -79,6 +83,7 @@ func _layout() -> void:
 		_glow.size = Vector2(size.x + 160, light_reach * 2.2 + 6)
 		_glow_mat.set_shader_parameter("rect_size", _glow.size)
 		_glow_mat.set_shader_parameter("surface_y", light_reach * 2.2)
+	if _haze:
 		_haze.position = Vector2(0, -90)
 		_haze.size = Vector2(size.x, 86)
 	queue_redraw()
@@ -148,6 +153,26 @@ func _draw() -> void:
 		col.a = 0.16 * smoothstep(0.0, 0.15, k) * (1.0 - k)
 		DrawKit.draw_puff(self, s.p, s.r * 1.6, col)
 	if Engine.is_editor_hint():
-		draw_rect(Rect2(Vector2.ZERO, size), Color(1.0, 0.45, 0.1, 0.8))
 		DrawKit.editor_box(self, Rect2(Vector2(0, -light_reach), Vector2(size.x, light_reach)), Color(1, 0.7, 0.3, 0.5), "lit: no hiding")
 		DrawKit.editor_box(self, Rect2(Vector2.ZERO, size), DrawKit.EDITOR_HAZARD, "molten steel")
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(Vector2.ZERO, size)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": size}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	size = p.max(Vector2(20, 20))
+
+
+## The molten steel glowing, still, brighter as the light goes.
+func _editor_preview() -> void:
+	_mat.set_shader_parameter("weather_time", 30.0)
+	_mat.set_shader_parameter("world_x", global_position.x)
+	_glow_mat.set_shader_parameter("weather_time", 30.0)
+	_glow_mat.set_shader_parameter("intensity", 1.0 + (1.0 - Daylight.light()) * 0.6)

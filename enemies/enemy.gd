@@ -375,3 +375,25 @@ func _draw_editor() -> void:
 		var b := Vector2(start_facing * sight_range, -eye_height + sight_range * 0.35)
 		draw_polyline(PackedVector2Array([a, eye, b]), Color(col, 0.5), 1.0)
 	DrawKit.editor_caption(self, Vector2(-20, 18), col, ("hunter" if hunts else "patrol"))
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-body_size.x * 0.5 - 4.0, -body_size.y - 6.0, body_size.x + 8.0, body_size.y + 8.0)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	var h: Array[Dictionary] = [{"id": "patrol_left", "pos": Vector2(-patrol_left, 4)}, {"id": "patrol_right", "pos": Vector2(patrol_right, 4)}]
+	if hunts:
+		h.append({"id": "sight_range", "pos": Vector2(start_facing * sight_range, -eye_height)})
+	return h
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	match id:
+		"patrol_left":
+			patrol_left = maxf(0.0, -p.x)
+		"patrol_right":
+			patrol_right = maxf(0.0, p.x)
+		"sight_range":
+			sight_range = maxf(40.0, absf(p.x))

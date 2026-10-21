@@ -106,3 +106,16 @@ func _draw() -> void:
 			var t0 := a + side * (k - 1) * 5.0
 			draw_line(t0, t0 + dir * 6.0, Color.BLACK, 1.4)
 	_draw_cover_outline()
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-bottom_row * radius, -rows * radius * 1.75 - 4, bottom_row * radius * 2.0, rows * radius * 1.75 + 4)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "radius", "pos": Vector2(bottom_row * radius, -rows * radius * 1.75)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	radius = clampf(p.x / bottom_row, 10.0, 60.0)

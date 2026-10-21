@@ -37,3 +37,9 @@ func _draw() -> void:
 		x += rng.randf_range(5, 12)
 	if Engine.is_editor_hint():
 		DrawKit.editor_box(self, Rect2(Vector2.ZERO, size), DrawKit.EDITOR_HAZARD, "spikes")
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+## Unlike other zones the spikes can be seen.
+func _editor_hit(p: Vector2) -> DrawKit.EditorHit:
+	return DrawKit.EditorHit.BOX if _editor_rect().has_point(p) else DrawKit.EditorHit.MISS

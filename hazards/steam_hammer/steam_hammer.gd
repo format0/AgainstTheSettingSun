@@ -167,3 +167,19 @@ func _draw() -> void:
 		DrawKit.draw_puff(self, s.p, s.r * 1.6, Color(0.85, 0.78, 0.72, a))
 	if Engine.is_editor_hint():
 		DrawKit.editor_box(self, Rect2(-hx, -8.0 - stroke - head_size.y, head_size.x, stroke + head_size.y), DrawKit.EDITOR_HAZARD, "crushes")
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-head_size.x * 0.5 - 34.0, -frame_height - 68.0, head_size.x + 68.0, frame_height + 68.0)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "stroke", "pos": Vector2(head_size.x * 0.5, -8.0 - stroke - head_size.y)}, {"id": "frame_height", "pos": Vector2(0, -frame_height)}]
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	if id == "stroke":
+		stroke = maxf(10.0, -p.y - 8.0 - head_size.y)
+	else:
+		frame_height = maxf(head_size.y + 40.0, -p.y)

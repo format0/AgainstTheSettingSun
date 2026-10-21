@@ -113,3 +113,16 @@ func _ellipse(center: Vector2, radii: Vector2, angle: float) -> void:
 		var a := i * TAU / 14.0
 		pts.append(center + Vector2(cos(a) * radii.x, sin(a) * radii.y).rotated(angle))
 	draw_colored_polygon(pts, Color.BLACK)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-11, -13, 22, 15)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "territory", "pos": Vector2(territory, 0)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	territory = maxf(0.0, absf(p.x))

@@ -101,3 +101,18 @@ func _draw() -> void:
 			draw_circle(Vector2.ZERO, 1.0, Color.BLACK)
 		draw_set_transform(Vector2.ZERO)
 
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	var r := Rect2(Vector2(-10, -20) * size, Vector2(20, 20) * size)
+	for b in _branches:
+		r = r.expand(b.end)
+	return r.grow(16.0 * size)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": Vector2(0, -220.0 * size)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	size = clampf(-p.y / 220.0, 0.4, 2.5)

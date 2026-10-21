@@ -34,3 +34,16 @@ func _draw() -> void:
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(half_width, 5.0))
 		draw_arc(Vector2.ZERO, 1.0, 0, TAU, 48, Color(0.4, 0.7, 1.0, 0.8), 0.3)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-half_width, -5, half_width * 2.0, 10)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "half_width", "pos": Vector2(half_width, 0)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	half_width = maxf(8.0, absf(p.x))

@@ -107,3 +107,16 @@ func _draw() -> void:
 			for i in int(size.x / 9.0):
 				var gx := rng.randf_range(0, size.x)
 				draw_line(Vector2(gx, 0), Vector2(gx - 1.5, -rng.randf_range(3, 8)), c, 1.0)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(Vector2.ZERO, size)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": size}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	size = p.max(Vector2(8, 8))

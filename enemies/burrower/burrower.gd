@@ -148,3 +148,16 @@ func _draw() -> void:
 		DrawKit.ellipse(self, Vector2(_x, -h * 0.25), Vector2(10, h * 0.3 + 2.0), 0.0, c, 12)
 	if Engine.is_editor_hint():
 		DrawKit.editor_box(self, Rect2(-w * 0.5, -56, w, 56), DrawKit.EDITOR_ENEMY, "burrower")
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-patch_width * 0.5, -16, patch_width, 18)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "patch_width", "pos": Vector2(patch_width * 0.5, 0)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	patch_width = maxf(20.0, absf(p.x) * 2.0)

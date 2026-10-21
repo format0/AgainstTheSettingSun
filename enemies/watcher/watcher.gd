@@ -173,3 +173,25 @@ func _draw() -> void:
 		DrawKit.editor_caption(self, Vector2(-20, 14), DrawKit.EDITOR_ENEMY, "watcher (alarm)")
 	else:
 		draw_circle(head + Vector2(2, -1), 2.6, Color(0.85, 0.92, 1.0, 0.9))
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-22, -52, 44, 52)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	var eye := Vector2(10, -34)
+	return [{"id": "from", "pos": eye + Vector2.from_angle(deg_to_rad(sweep_from)) * beam_length, "props": ["sweep_from", "beam_length"]},
+		{"id": "to", "pos": eye + Vector2.from_angle(deg_to_rad(sweep_to)) * beam_length, "props": ["sweep_to", "beam_length"]}]
+
+
+## Dragging the end of a beam sets its angle and the beam's length.
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	var d := p - Vector2(10, -34)
+	if id == "from":
+		sweep_from = roundf(rad_to_deg(d.angle()))
+	else:
+		sweep_to = roundf(rad_to_deg(d.angle()))
+	beam_length = maxf(40.0, roundf(d.length()))
+	queue_redraw()

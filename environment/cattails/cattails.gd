@@ -60,3 +60,17 @@ func _draw() -> void:
 			# a blade leaf curling off the stem
 			var p := pts[2]
 			draw_polyline(PackedVector2Array([p, p + Vector2(4 + bend * 10.0, -8), p + Vector2(9 + bend * 22.0, -10)]), c, 1.0)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(0, -height, width, height)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": Vector2(width, -height), "props": ["width", "height"]}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	width = maxf(10.0, p.x)
+	height = maxf(10.0, -p.y)

@@ -98,3 +98,19 @@ func _draw() -> void:
 		Support.HANGERS:
 			for px: float in [10.0, length - 10.0]:
 				draw_line(Vector2(px, 2), Vector2(px, -support_length), c, 2.0)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	var r := Rect2(0, -6, length, 16)
+	if support == Support.POSTS:
+		r = r.expand(Vector2(length, 6.0 + support_length))
+	return r
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "length", "pos": Vector2(length, 0)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	length = maxf(20.0, p.x)

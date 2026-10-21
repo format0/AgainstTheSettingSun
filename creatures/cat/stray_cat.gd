@@ -98,3 +98,19 @@ func _draw() -> void:
 			draw_line(Vector2(bx, -7), Vector2(bx, -7) + Vector2.from_angle(PI * 0.5 + a) * 8.0, c, 1.5)
 		draw_polyline(PackedVector2Array([Vector2(-7, -9), Vector2(-12, -12 + tail_sway * 2.0), Vector2(-16, -18 + tail_sway * 3.0 + run * 6.0)]), c, 1.8)
 	draw_set_transform(Vector2.ZERO)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-18, -28, 36, 30)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "wander_left", "pos": Vector2(-wander_left, 0)}, {"id": "wander_right", "pos": Vector2(wander_right, 0)}]
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	if id == "wander_left":
+		wander_left = maxf(0.0, -p.x)
+	else:
+		wander_right = maxf(0.0, p.x)

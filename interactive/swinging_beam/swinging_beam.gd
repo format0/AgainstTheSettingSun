@@ -100,3 +100,25 @@ func _draw() -> void:
 				DrawKit.vine(self, Vector2(x, r.end.y), 9.0 + k * 7.0, k * 2.1 + i)
 		prev_top = Vector2(r.get_center().x, r.end.y)
 	draw_circle(Vector2.ZERO, 4.0, c)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	var r := Rect2(-8, 0, 16, 16)
+	for b in beams:
+		r = r.merge(b)
+	return r
+
+
+## The far corner of each beam sets its size.
+func _editor_handles() -> Array[Dictionary]:
+	var h: Array[Dictionary] = []
+	for i in beams.size():
+		h.append({"id": i, "pos": beams[i].end, "props": ["beams"]})
+	return h
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	var b := beams.duplicate()
+	b[id] = Rect2(b[id].position, (p - b[id].position).max(Vector2(16, 6)))
+	beams = b

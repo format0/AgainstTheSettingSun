@@ -185,3 +185,19 @@ func _hook_block(at: Vector2) -> void:
 	var c := Color.BLACK
 	draw_rect(Rect2(at.x - 7, at.y - 16, 14, 12), c)
 	draw_arc(at + Vector2(0, -1), 5.0, -PI * 0.1, PI * 1.1, 10, c, 2.4)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(Vector2.ZERO, size).merge(Rect2(travel, size))
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": size}, {"id": "travel", "pos": travel + size * 0.5}]
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	if id == "size":
+		size = p.max(Vector2(16, 6))
+	else:
+		travel = p - (size * 0.5).round()

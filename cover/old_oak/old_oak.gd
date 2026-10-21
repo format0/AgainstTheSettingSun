@@ -163,3 +163,21 @@ func _draw() -> void:
 				draw_set_transform(p, flutter * 0.03, Vector2.ONE)
 			draw_set_transform(Vector2.ZERO)
 	_draw_cover_outline()
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	var r := Rect2(Vector2(-20, -20) * size, Vector2(40, 20) * size)
+	for b in _branches:
+		r = r.expand(b.end)
+		for cl in b.clumps:
+			r = r.expand((b.end as Vector2) + (cl.off as Vector2))
+	return r.grow(36.0 * size)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": Vector2(0, -330.0 * size)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	size = clampf(-p.y / 330.0, 0.5, 2.0)

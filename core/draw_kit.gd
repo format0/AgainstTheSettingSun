@@ -261,6 +261,11 @@ const EDITOR_ENEMY := Color(0.75, 0.45, 1.0, 0.9)
 const EDITOR_COVER := Color(0.3, 0.9, 0.55, 0.8)
 const EDITOR_GAMEPLAY := Color(0.3, 0.85, 1.0, 0.9)
 
+## What an element's _editor_hit() says about a point (the Level Tools pick the element
+## under a click with it): MISS, on its drawn SHAPE (picked first), inside its BOX, or
+## inside a large AREA (picked only where nothing else is).
+enum EditorHit { MISS, SHAPE, BOX, AREA }
+
 
 ## Outline and caption shown only in the editor.
 static func editor_box(ci: CanvasItem, rect: Rect2, col: Color, caption := "") -> void:

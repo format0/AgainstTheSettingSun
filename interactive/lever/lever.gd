@@ -113,3 +113,8 @@ func _draw() -> void:
 	Mechanism.draw_links(self, targets)
 	if Engine.is_editor_hint():
 		DrawKit.editor_caption(self, Vector2(-14, 12), DrawKit.EDITOR_INTERACTIVE, "lever")
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-14, -32, 28, 34)

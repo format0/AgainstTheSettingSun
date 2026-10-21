@@ -178,3 +178,19 @@ func _plank(at: Vector2, angle: float, length: float) -> void:
 	draw_set_transform(at, angle)
 	draw_rect(Rect2(-length * 0.5, 0, length, 5), Color.BLACK)
 	draw_set_transform(Vector2.ZERO)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(0, -10, 0, 0).expand(end + Vector2(0, -10)).expand(Vector2(end.x, maxf(0.0, end.y) + sag + 30.0))
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "end", "pos": end}, {"id": "sag", "pos": end * 0.5 + Vector2(0, sag)}]
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	if id == "end":
+		end = p
+	else:
+		sag = maxf(0.0, p.y - end.y * 0.5)

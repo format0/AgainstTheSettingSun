@@ -98,3 +98,16 @@ func _draw() -> void:
 	Mechanism.draw_links(self, targets)
 	if Engine.is_editor_hint():
 		DrawKit.editor_caption(self, Vector2(-width * 0.5, -10), DrawKit.EDITOR_INTERACTIVE, "plate")
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-width * 0.5, -8, width, 10)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "width", "pos": Vector2(width * 0.5, -4)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	width = maxf(12.0, absf(p.x) * 2.0)

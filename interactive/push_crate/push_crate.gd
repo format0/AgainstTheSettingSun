@@ -214,3 +214,16 @@ static func draw_crate(ci: CanvasItem, r: Rect2, seed_value: int) -> void:
 	if rng.randf() < 0.4:
 		# a broken corner
 		ci.draw_colored_polygon(PackedVector2Array([r.position + Vector2(r.size.x - 3, 0), r.position + Vector2(r.size.x + 3, -4), r.position + Vector2(r.size.x - 8, -1)]), c)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-size.x * 0.5, -size.y, size.x, size.y)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": Vector2(size.x * 0.5, -size.y)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	size = Vector2(maxf(12.0, absf(p.x) * 2.0), maxf(12.0, -p.y))

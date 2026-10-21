@@ -56,3 +56,16 @@ func _draw() -> void:
 	DrawKit.ellipse(self, Vector2.ZERO, Vector2(6, 2.3), 0.0, Color.BLACK, 10)
 	draw_colored_polygon(PackedVector2Array([Vector2(-5, 0), Vector2(-10, -3.5 + sin(Weather.time * 30.0)), Vector2(-10, 3.5 + sin(Weather.time * 30.0))]), Color.BLACK)
 	draw_set_transform(Vector2.ZERO)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(0, -12, width, 20)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "width", "pos": Vector2(width, 0)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	width = maxf(20.0, p.x)

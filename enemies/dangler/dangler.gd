@@ -152,3 +152,22 @@ func _draw() -> void:
 	else:
 		DrawKit.editor_link(self, Vector2(0, rest_drop), Vector2(0, strike_drop), DrawKit.EDITOR_ENEMY)
 		DrawKit.editor_box(self, Rect2(-sense_width, strike_drop - 40, sense_width * 2.0, 60), DrawKit.EDITOR_ENEMY, "dangler drops here")
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-16, 0, 32, rest_drop + 70.0)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "rest_drop", "pos": Vector2(0, rest_drop)}, {"id": "strike_drop", "pos": Vector2(0, strike_drop)}, {"id": "sense_width", "pos": Vector2(sense_width, strike_drop - 10.0)}]
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	match id:
+		"rest_drop":
+			rest_drop = clampf(p.y, 10.0, strike_drop - 10.0)
+		"strike_drop":
+			strike_drop = maxf(p.y, rest_drop + 10.0)
+		"sense_width":
+			sense_width = maxf(10.0, absf(p.x))

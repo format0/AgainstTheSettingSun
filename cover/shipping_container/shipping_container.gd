@@ -154,3 +154,16 @@ func _draw() -> void:
 			var tip := hinge + Vector2(cos(swing) * w * s, 0)
 			draw_colored_polygon(PackedVector2Array([hinge, tip + Vector2(0, -sin(swing) * 6.0), tip + Vector2(0, size.y - 6.0 - sin(swing) * 6.0), hinge + Vector2(0, size.y - 6.0)]), c)
 	_draw_cover_outline()
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(0, -size.y, size.x, size.y)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": Vector2(size.x, -size.y)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	size = Vector2(maxf(60.0, p.x), maxf(40.0, -p.y))

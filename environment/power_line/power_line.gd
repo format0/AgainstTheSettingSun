@@ -73,3 +73,44 @@ func _draw_wire(p0: Vector2, p1: Vector2, wire_sag: float) -> void:
 		var u := i / 16.0
 		pts.append(p0.lerp(p1, u) + Vector2(0, 4.0 * wire_sag * u * (1.0 - u)))
 	draw_polyline(pts, Color.BLACK, 1.15, true)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	var r := Rect2(-32, -pole_height - 24.0, 64, pole_height + 24.0)
+	for x in pole_x:
+		r = r.expand(Vector2(x + 32.0, 0))
+	return r
+
+
+## Only its poles and wires count, not the empty sky between them.
+func _editor_hit(p: Vector2) -> DrawKit.EditorHit:
+	var top := -pole_height
+	for x in pole_x:
+		if absf(p.x - x) < 8.0 and p.y > top - 24.0 and p.y < 2.0:
+			return DrawKit.EditorHit.SHAPE
+	for i in pole_x.size() - 1:
+		var a := pole_x[i]
+		var b := pole_x[i + 1]
+		if p.x < minf(a, b) or p.x > maxf(a, b):
+			continue
+		var u := (p.x - a) / (b - a) if b != a else 0.0
+		var s := 4.0 * sag * u * (1.0 - u)
+		if p.y > top - 24.0 + s * 0.6 - 10.0 and p.y < top + s + 12.0:
+			return DrawKit.EditorHit.SHAPE
+	return DrawKit.EditorHit.MISS
+
+
+## The top of each pole: drag it sideways to move the pole, up or down for the height of all.
+func _editor_handles() -> Array[Dictionary]:
+	var h: Array[Dictionary] = []
+	for i in pole_x.size():
+		h.append({"id": i, "pos": Vector2(pole_x[i], -pole_height), "props": ["pole_x", "pole_height"]})
+	return h
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	var xs := pole_x.duplicate()
+	xs[id] = p.x
+	pole_x = xs
+	pole_height = maxf(40.0, -p.y)

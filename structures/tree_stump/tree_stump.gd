@@ -71,3 +71,17 @@ func _draw() -> void:
 		var p := Vector2(width * 0.15, -height - 2)
 		DrawKit.limb(self, p, p + Vector2(18, -26), 3.0, 2.6)
 		draw_colored_polygon(PackedVector2Array([p + Vector2(-6, 3), p + Vector2(8, -3), p + Vector2(7, 4), p + Vector2(-3, 7)]), c)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-width * 0.5, -height, width, height)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": Vector2(width * 0.5, -height), "props": ["width", "height"]}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	width = maxf(12.0, absf(p.x) * 2.0)
+	height = maxf(8.0, -p.y)

@@ -112,3 +112,16 @@ func _draw() -> void:
 	# the leader at the top, with a last tuft
 	var tip := pts[8]
 	draw_colored_polygon(PackedVector2Array([tip + Vector2(0, -10), tip + Vector2(4, 4), tip + Vector2(6, 12), tip + Vector2(-6, 12), tip + Vector2(-4, 4)]), c)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-0.32 * height, -height - 12.0, 0.64 * height, height + 12.0)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "height", "pos": Vector2(0, -height)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	height = maxf(40.0, -p.y)

@@ -5,10 +5,17 @@ extends Node2D
 ## the editor view is. The plugin adds one to an open level (not saved with the scene) and
 ## takes it away again. Nothing here moves on its own; it is only redrawn when the view or
 ## the level's sky settings change, so editing stays light.
+## It also sets the time of day and the weather the elements preview themselves in: on a
+## change every element with an _editor_preview() method is asked to show itself again.
 
 const GAME_VIEW := Vector2(1366, 768)
 
 var level: Node
+## The point of the sunset to show (0..1); below 0 the level's own start_progress.
+var preview_progress := -1.0:
+	set(v):
+		preview_progress = v
+		_check = 0.0
 var _sky: Node2D
 var _sky_mat: ShaderMaterial
 var _layers: Array[Node2D] = []     # parallax wrappers (far, mid)
@@ -36,7 +43,7 @@ func _settings_key() -> String:
 	# rebuild when the level's distant scenery, sky or sunset start change
 	var d := _find("DistantScenery")
 	var s := _find("SkyEffect")
-	var parts := [level.get("start_progress") if level else 0.0]
+	var parts := [level.get("start_progress") if level else 0.0, preview_progress]
 	if d:
 		parts.append_array([d.setting, d.far_scroll, d.mid_scroll, d.far_opacity, d.mid_opacity, d.show_far, d.show_mid])
 	if s:
@@ -128,12 +135,14 @@ func _process(delta: float) -> void:
 	var sink := Vector2(0, smoothstep(0.1, 0.9, Daylight.progress) * 230.0)
 	_sky_mat.set_shader_parameter("game_cam", cam)
 	_sky_mat.set_shader_parameter("cam_x", cam.x)
-	_sky_mat.set_shader_parameter("sun_pos", sun + sink - Vector2(cam.x * par, 0.0))
+	Weather.sun_screen_pos = sun + sink - Vector2(cam.x * par, 0.0)
+	_sky_mat.set_shader_parameter("sun_pos", Weather.sun_screen_pos)
 	_sky.queue_redraw()
 
 
 func _apply_settings() -> void:
-	Daylight.progress = float(level.get("start_progress")) if level.get("start_progress") != null else 0.0
+	var start: Variant = level.get("start_progress")
+	Daylight.progress = preview_progress if preview_progress >= 0.0 else (float(start) if start != null else 0.0)
 	var w := _find("WeatherController")
 	Weather.storm = w.storm if w else 1.0
 	var s := _find("SkyEffect")
@@ -142,6 +151,9 @@ func _apply_settings() -> void:
 	_sky_mat.set_shader_parameter("storm", Weather.storm)
 	_sky_mat.set_shader_parameter("cloud_cover", s.cloud_cover if s else 0.4)
 	_sky_mat.set_shader_parameter("weather_time", 30.0)
+	for n in level.find_children("*", "", true, false):
+		if n.has_method("_editor_preview"):
+			n._editor_preview()
 
 
 func _draw_sky() -> void:

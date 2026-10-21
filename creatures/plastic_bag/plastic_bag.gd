@@ -1,3 +1,4 @@
+@tool
 @icon("res://creatures/plastic_bag/plastic_bag_icon.svg")
 class_name PlasticBag
 extends Node2D
@@ -19,6 +20,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
 	var g := Weather.gust_at(global_position.x)
 	if not _in_air:
 		_vel.x += (-Weather.wind * 95.0 * g - _vel.x) * delta * 2.0
@@ -50,3 +53,8 @@ func _draw() -> void:
 		var r := 6.5 + 2.6 * sin(i * 2.3 + _seed + Weather.time * 6.0) + (2.0 if i % 3 == 0 else 0.0)
 		pts.append(Vector2(cos(a) * r * 1.2, -5.0 + sin(a) * r * 0.8))
 	draw_colored_polygon(pts, Color.BLACK)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-11, -13, 22, 15)

@@ -48,3 +48,16 @@ func _draw() -> void:
 	for k in 7:
 		var p := _poly[clampi(_poly.size() / 2 - 3 + k, 0, _poly.size() - 1)]
 		draw_line(p, p + Vector2(-1.0 - Weather.wind * 2.0, -4.0 - k % 3 * 2.0), Color.BLACK, 1.0)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-size.x * 0.5, -size.y, size.x, size.y)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": Vector2(size.x * 0.5, -size.y)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	size = Vector2(maxf(16.0, absf(p.x) * 2.0), maxf(10.0, -p.y))

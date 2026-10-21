@@ -92,3 +92,16 @@ func _draw() -> void:
 		draw_line(Vector2(rx, base), Vector2(rx, base - 12.0), c, 1.2)
 	draw_line(Vector2(-w - 12.0, base - 12.0), Vector2(w + 12.0, base - 12.0), c, 1.4)
 	_draw_cover_outline()
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-maxf(48.0, tank_size.x * 0.5 + 16.0), -height - tank_size.y + 10.0, maxf(96.0, tank_size.x + 32.0), height + tank_size.y - 10.0)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "height", "pos": Vector2(0, -height)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	height = maxf(40.0, -p.y)

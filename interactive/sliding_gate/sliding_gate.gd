@@ -180,3 +180,16 @@ func _draw() -> void:
 	if Engine.is_editor_hint():
 		draw_rect(Rect2(_dir() * t, size), DrawKit.EDITOR_INTERACTIVE, false, 1.0)
 		DrawKit.editor_caption(self, Vector2(0, -14), DrawKit.EDITOR_INTERACTIVE, "gate")
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(Vector2.ZERO, size)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": size}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	size = p.max(Vector2(6, 6))

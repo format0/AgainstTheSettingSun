@@ -1,3 +1,4 @@
+@tool
 @icon("res://creatures/rat/rat_icon.svg")
 class_name Rat
 extends Node2D
@@ -20,6 +21,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
 	var p := get_tree().get_first_node_in_group("player") as Node2D
 	_timer -= delta
 	if p and absf(p.global_position.x - global_position.x) < 70.0 and absf(p.global_position.y - global_position.y) < 40.0:
@@ -52,3 +55,16 @@ func _draw() -> void:
 	draw_circle(Vector2(3.5, -6.5 - bob), 1.6, c)
 	draw_polyline(PackedVector2Array([Vector2(-5, -3), Vector2(-11, -2 + sin(Weather.time * 5.0)), Vector2(-16, -4)]), c, 1.0)
 	draw_set_transform(Vector2.ZERO)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-16, -11, 28, 12)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "territory", "pos": Vector2(territory, 0)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	territory = maxf(0.0, absf(p.x))

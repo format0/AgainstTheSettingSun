@@ -80,6 +80,8 @@ creatures/     ■ grey    harmless animals: frogs, crows, bats, fireflies, a ca
 effects/       weather and look: sky, rain, fog, lightning, post effects, sound
 game/          the frame around the levels and the picture pipeline (bloom, light shafts, grade)
 ui/            the fade and title overlay, the F1 look panel
+addons/        Level Tools, the editor plugin for designing levels
+tools/         checks that every element works in the editor (see CLAUDE.md)
 ```
 
 In the editor every gameplay element also marks itself: orange dashed lines from switches to
@@ -176,11 +178,21 @@ place to design levels in:
   same shader, with the level's sun, clouds and time of day) and both layers of distant
   scenery, placed as the game camera would see them from where you are looking. Toggle it
   with **Sky** in the 2D toolbar. It is drawn only in the editor and never saved.
+- **Fog and lights.** The level's fog lies over the view, still (toggle **Fog**), and street
+  lamps, lanterns, fire barrels, molten steel and water show their glow as in the game.
+- **Any time of day.** The **Time** slider shows the level at any point of the sunset: the
+  light fades, lamps switch on as they would. Only a preview; the level starts at its
+  `start_progress`.
 - **Click anything to select it.** Trees, walls, machinery, creatures: click it in the view
   (Shift adds to the selection) and drag to move it (Shift snaps to 8 px). One undo step per
   move. Rotate and scale with the usual tools or the Inspector; every size and shape setting
   of an element is in the Inspector.
-- **Shape the ground.** Select a `Terrain` (or a `Roof`): drag its points, click the small dot
+- **Shape things in the view.** A selected element shows diamond handles for its shape: the
+  corner of a wall, a container, a zone or a pool; the height of a tree, a lamp post or a
+  water tower; each pole of a power line, the end of each hanging chain, the far end and sag
+  of a bridge, the travel of a platform, the patrol ends and sight of an enemy, the beam of a
+  watcher. Drag them (Shift snaps to 8 px); each drag is one undo step.
+- **Shape the ground.** Select a `Terrain` (or a `Roof`, or `RustyPipes`): drag its points, click the small dot
   between two points to add one, right-click a point to remove it. Grass, stones, roots and
   collision follow at once. Everything can be undone.
 - **Move the spawn point.** Select the level's root and drag the blue spawn handle; the Player
@@ -204,6 +216,11 @@ by side on a flat strip, to look at them against the sunset (run it with F6, F1 
 6. Keep hazards and things the player must see out of the way of cover shapes: black in front of black is invisible (creatures get a faint rim there, but machinery doesn't).
 
 ## Adding a new element
+
+Every element must work in the editor as well as in the game; `CLAUDE.md` has the rules
+(what to build in the editor, the `_editor_rect()`, `_editor_handles()`, `_editor_drag()` and
+`_editor_preview()` methods) and the two checks, `tools/check_elements.gd` and
+`tools/editor_check.sh`.
 
 1. Make a folder in the matching category and a script with `@tool`, `@icon(...)` and `class_name`.
 2. Draw it in `_draw()` in black (helpers in `DrawKit`), and read `Weather` and `Daylight` to make it move and react to the dusk.

@@ -110,3 +110,19 @@ func _wheel(at: Vector2, radius: float) -> void:
 		var a := k * PI / 4.0
 		draw_line(at - Vector2.from_angle(a) * radius, at + Vector2.from_angle(a) * radius, c, 1.4)
 	draw_circle(at, 2.5, c)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-length * 0.5, -diameter - 24.0, length, diameter + 24.0)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "length", "pos": Vector2(length * 0.5, -18.0 - diameter * 0.5)}, {"id": "diameter", "pos": Vector2(0, -18.0 - diameter)}]
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	if id == "length":
+		length = maxf(60.0, absf(p.x) * 2.0)
+	else:
+		diameter = maxf(30.0, -p.y - 18.0)

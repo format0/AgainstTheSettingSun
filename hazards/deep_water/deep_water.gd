@@ -13,7 +13,11 @@ extends Node2D
 ## Horizontal drift for floating things, in pixels per second.
 @export var current := 0.0
 ## How much of the sky it mirrors.
-@export_range(0.0, 1.0) var reflection := 0.55
+@export_range(0.0, 1.0) var reflection := 0.55:
+	set(v):
+		reflection = v
+		if _mat and Engine.is_editor_hint():
+			_editor_preview()
 
 var _rect: ColorRect
 var _mat: ShaderMaterial
@@ -24,9 +28,6 @@ func _ready() -> void:
 	Game.no_occlude(self)
 	add_to_group("water")
 	z_index = Layers.WATER
-	if Engine.is_editor_hint():
-		queue_redraw()
-		return
 	_rect = ColorRect.new()
 	_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_mat = ShaderMaterial.new()
@@ -34,6 +35,8 @@ func _ready() -> void:
 	_rect.material = _mat
 	add_child(_rect)
 	_layout()
+	if Engine.is_editor_hint():
+		_editor_preview()
 
 
 func _layout() -> void:
@@ -106,6 +109,28 @@ func _check_body(body: Node2D, pos: Vector2, vy: float) -> void:
 
 func _draw() -> void:
 	if Engine.is_editor_hint():
-		draw_rect(Rect2(Vector2.ZERO, size), Color(0.05, 0.08, 0.12, 0.85))
-		draw_line(Vector2.ZERO, Vector2(size.x, 0), Color(0.6, 0.8, 1.0, 0.8), 1.5)
 		DrawKit.editor_box(self, Rect2(Vector2.ZERO, size), DrawKit.EDITOR_HAZARD, "deep water (drowns)")
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(Vector2.ZERO, size)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": size}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	size = p.max(Vector2(20, 20))
+
+
+## The water as it looks at the previewed time of day, with the wind of the level's weather.
+func _editor_preview() -> void:
+	_mat.set_shader_parameter("view_size", Vector2(1366, 768))
+	_mat.set_shader_parameter("weather_time", 30.0)
+	_mat.set_shader_parameter("world_x", global_position.x)
+	_mat.set_shader_parameter("wind", Weather.wind)
+	_mat.set_shader_parameter("storm", Weather.storm)
+	_mat.set_shader_parameter("light", Daylight.light())
+	_mat.set_shader_parameter("reflect", reflection * (0.3 + 0.7 * Daylight.light()))

@@ -66,3 +66,16 @@ func _draw_cover_outline() -> void:
 	var shapes := _cover_shapes()
 	if not shapes.is_empty() and not shapes[0].is_empty():
 		DrawKit.editor_caption(self, shapes[0][0] + Vector2(2, 12), DrawKit.EDITOR_COVER, "cover")
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_hit(p: Vector2) -> DrawKit.EditorHit:
+	for s in _cover_shapes():
+		if Geometry2D.is_point_in_polygon(p, s):
+			return DrawKit.EditorHit.SHAPE
+	return DrawKit.EditorHit.BOX if _editor_rect().has_point(p) else DrawKit.EditorHit.MISS
+
+
+## Subclasses return their box (in their own coordinates).
+func _editor_rect() -> Rect2:
+	return Rect2(-12, -12, 24, 24)

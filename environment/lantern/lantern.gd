@@ -9,10 +9,16 @@ extends Node2D
 @export var drop := 40.0:
 	set(v):
 		drop = v
-		queue_redraw()
-@export var light_radius := 80.0
+		_relayout()
+@export var light_radius := 80.0:
+	set(v):
+		light_radius = v
+		_relayout()
 ## It can go out for good as the night comes (0 = never).
-@export_range(0.0, 1.0) var dies_at := 0.0
+@export_range(0.0, 1.0) var dies_at := 0.0:
+	set(v):
+		dies_at = v
+		_relayout()
 
 var intensity := 1.0
 var _angle := 0.0
@@ -23,8 +29,6 @@ var _mat: ShaderMaterial
 
 func _ready() -> void:
 	z_index = Layers.ELEMENTS
-	if Engine.is_editor_hint():
-		return
 	add_to_group("light_sources")
 	add_to_group("lamps")
 	_light = ColorRect.new()
@@ -34,14 +38,29 @@ func _ready() -> void:
 	_mat = ShaderMaterial.new()
 	_mat.shader = preload("res://environment/fire_barrel/point_light.gdshader")
 	_mat.set_shader_parameter("color", Color(1.0, 0.7, 0.35))
-	_mat.set_shader_parameter("radius", light_radius)
 	_light.material = _mat
+	_layout_light()
+	add_child(_light)
+	if Engine.is_editor_hint():
+		_editor_preview()
+		return
 	Game.no_occlude(_light)
+
+
+func _layout_light() -> void:
 	var s := light_radius * 3.0
 	_light.size = Vector2(s, s)
+	_light.position = _lamp_pos() - _light.size * 0.5
+	_mat.set_shader_parameter("radius", light_radius)
 	_mat.set_shader_parameter("rect_size", _light.size)
 	_mat.set_shader_parameter("center", Vector2(s * 0.5, s * 0.5))
-	add_child(_light)
+
+
+func _relayout() -> void:
+	queue_redraw()
+	if _light and Engine.is_editor_hint():
+		_layout_light()
+		_editor_preview()
 
 
 func _lamp_pos() -> Vector2:
@@ -86,3 +105,27 @@ func _draw() -> void:
 	var flame := Color(1.0, 0.8, 0.45, intensity)
 	DrawKit.ellipse(self, Vector2(0, 1), Vector2(2.0, 3.6 * (0.8 + intensity * 0.3)), 0.0, flame, 10)
 	draw_set_transform(Vector2.ZERO)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-14, 0, 28, drop + 24.0)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "drop", "pos": Vector2(0, drop)}, {"id": "light_radius", "pos": Vector2(light_radius, drop + 10.0)}]
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	if id == "drop":
+		drop = maxf(0.0, p.y)
+	else:
+		light_radius = maxf(10.0, absf(p.x))
+
+
+## The lantern as it looks at the previewed time of day, hanging still.
+func _editor_preview() -> void:
+	intensity = 0.9 if dies_at <= 0.0 or Daylight.progress < dies_at else 0.0
+	_mat.set_shader_parameter("intensity", intensity * (1.0 + (1.0 - Daylight.light()) * 0.5))
+	_mat.set_shader_parameter("weather_time", 30.0)
+	queue_redraw()

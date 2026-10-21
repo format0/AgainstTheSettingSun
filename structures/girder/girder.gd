@@ -86,3 +86,28 @@ func _draw() -> void:
 		DrawKit.limb(self, Vector2(x - 6, depth + 24), Vector2(x - 26, depth + 4), 2.0, 2.0)
 	for w in _weeds:
 		DrawKit.vine(self, Vector2(w.x, depth), w.y, w.z)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	var r := Rect2(0, 0, length, depth)
+	if not columns.is_empty():
+		r = r.expand(Vector2(r.position.x, depth + column_height))
+	return r
+
+
+func _editor_handles() -> Array[Dictionary]:
+	var h: Array[Dictionary] = [{"id": "length", "pos": Vector2(length, depth * 0.5)}, {"id": "depth", "pos": Vector2(length * 0.5, depth)}]
+	if not columns.is_empty():
+		h.append({"id": "column_height", "pos": Vector2(columns[0], depth + column_height)})
+	return h
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	match id:
+		"length":
+			length = maxf(20.0, p.x)
+		"depth":
+			depth = maxf(4.0, p.y)
+		"column_height":
+			column_height = maxf(0.0, p.y - depth)

@@ -6,11 +6,14 @@ extends Node2D
 ## light on the rain. Someone lit it long ago... Its light takes away the player's shadow
 ## (enemies see you close to it). The node's position is the foot of the drum.
 
-@export var light_radius := 100.0
+@export var light_radius := 100.0:
+	set(v):
+		light_radius = v
+		_relayout()
 @export var drum_height := 34.0:
 	set(v):
 		drum_height = v
-		queue_redraw()
+		_relayout()
 
 var intensity := 1.0
 var _light: ColorRect
@@ -21,8 +24,6 @@ var _crackle: AudioStreamPlayer2D
 
 func _ready() -> void:
 	z_index = Layers.ELEMENTS
-	if Engine.is_editor_hint():
-		return
 	add_to_group("light_sources")
 	add_to_group("lamps")
 	_light = ColorRect.new()
@@ -32,13 +33,11 @@ func _ready() -> void:
 	_mat = ShaderMaterial.new()
 	_mat.shader = preload("res://environment/fire_barrel/point_light.gdshader")
 	_light.material = _mat
-	var s := light_radius * 3.2
-	_light.position = Vector2(-s * 0.5, -drum_height - s * 0.5)
-	_light.size = Vector2(s, s)
-	_mat.set_shader_parameter("rect_size", _light.size)
-	_mat.set_shader_parameter("center", Vector2(s * 0.5, s * 0.5 - 8.0))
-	_mat.set_shader_parameter("radius", light_radius)
+	_layout_light()
 	add_child(_light)
+	if Engine.is_editor_hint():
+		_editor_preview()
+		return
 	Game.no_occlude(_light)
 	_embers = EmberParticles.make(Vector2(8, 2), 14)
 	_embers.position = Vector2(0, -drum_height - 6)
@@ -49,6 +48,21 @@ func _ready() -> void:
 	_crackle.volume_db = -10.0
 	add_child(_crackle)
 	_crackle.play()
+
+
+func _layout_light() -> void:
+	var s := light_radius * 3.2
+	_light.position = Vector2(-s * 0.5, -drum_height - s * 0.5)
+	_light.size = Vector2(s, s)
+	_mat.set_shader_parameter("rect_size", _light.size)
+	_mat.set_shader_parameter("center", Vector2(s * 0.5, s * 0.5 - 8.0))
+	_mat.set_shader_parameter("radius", light_radius)
+
+
+func _relayout() -> void:
+	queue_redraw()
+	if _light and Engine.is_editor_hint():
+		_layout_light()
 
 
 func illuminates(world_pos: Vector2) -> bool:
@@ -81,8 +95,6 @@ func _draw() -> void:
 	draw_colored_polygon(PackedVector2Array([Vector2(4, -h - 2), Vector2(8, -h - 4), Vector2(13, -h - 2)]), c)
 	draw_line(Vector2(-6, -h - 1), Vector2(-11, -h - 12), c, 2.6)
 	draw_line(Vector2(3, -h - 1), Vector2(7, -h - 9), c, 2.0)
-	if Engine.is_editor_hint():
-		return
 	# the fire shows through holes rusted into the drum
 	var t0 := Weather.time
 	for hole: Vector3 in [Vector3(-6, -h * 0.3, 1.6), Vector3(4, -h * 0.55, 1.2), Vector3(-2, -h * 0.72, 1.0), Vector3(7, -h * 0.22, 0.9)]:
@@ -99,3 +111,27 @@ func _draw() -> void:
 		var col := Color(1.0, 0.55 + 0.25 * sin(t * 11.0 + i), 0.15, 0.85)
 		draw_colored_polygon(PackedVector2Array([Vector2(x - 3.5, -h - 1), Vector2(x + 3.5, -h - 1), tip]), col)
 		draw_colored_polygon(PackedVector2Array([Vector2(x - 1.5, -h - 1), Vector2(x + 1.5, -h - 1), Vector2(x + lean * 0.6, -h - 2 - tall * 0.55)]), Color(1.0, 0.92, 0.6, 0.9))
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-15, -drum_height - 12.0, 30, drum_height + 12.0)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "drum_height", "pos": Vector2(0, -drum_height)}, {"id": "light_radius", "pos": Vector2(light_radius, -drum_height)}]
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	if id == "drum_height":
+		drum_height = maxf(12.0, -p.y)
+	else:
+		light_radius = maxf(10.0, absf(p.x))
+
+
+## The fire burning, still, a little brighter as the light goes.
+func _editor_preview() -> void:
+	intensity = 0.9
+	_mat.set_shader_parameter("intensity", intensity * (1.0 + (1.0 - Daylight.light()) * 0.5))
+	_mat.set_shader_parameter("weather_time", 30.0)
+	queue_redraw()

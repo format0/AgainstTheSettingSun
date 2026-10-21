@@ -62,3 +62,11 @@ func _draw() -> void:
 		draw_line(v - Vector2(6, 0), v + Vector2(6, 0), c, 1.2)
 	for d in _drops:
 		draw_line(d, d + Vector2(0, 3), Color(0.8, 0.75, 0.7, 0.4 * Daylight.light()), 1.0)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	var r := Rect2(path[0], Vector2.ZERO) if path.size() > 0 else Rect2()
+	for q in path:
+		r = r.expand(q)
+	return r.grow(thickness + 4.0)

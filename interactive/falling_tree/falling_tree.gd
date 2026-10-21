@@ -241,3 +241,16 @@ func _draw() -> void:
 		DrawKit.editor_caption(self, Vector2(6, -height - 4), DrawKit.EDITOR_INTERACTIVE, "falls " + ["push", "near", "switch"][trigger])
 		if trigger == Trigger.PROXIMITY:
 			draw_line(Vector2(trigger_distance * fall_direction, 0), Vector2(trigger_distance * fall_direction, -40), DrawKit.EDITOR_HAZARD, 1.0)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-35, -height, 70, height)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "height", "pos": Vector2(0, -height)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	height = maxf(60.0, -p.y)

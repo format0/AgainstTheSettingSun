@@ -58,3 +58,20 @@ func _draw() -> void:
 		draw_circle(p, 5.0, Color(0.65, 0.9, 0.3, 0.14 * a))
 		draw_circle(p, 2.4, Color(0.8, 1.0, 0.45, 0.45 * a))
 		draw_circle(p, 1.3, Color(1.0, 1.0, 0.75, 1.0 * a))
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(Vector2.ZERO, size)
+
+
+func _editor_hit(p: Vector2) -> DrawKit.EditorHit:
+	return DrawKit.EditorHit.AREA if _editor_rect().has_point(p) else DrawKit.EditorHit.MISS
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": size}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	size = p.max(Vector2(20, 20))

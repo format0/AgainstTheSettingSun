@@ -70,3 +70,19 @@ func get_rain_edges() -> Array:
 func _draw() -> void:
 	for r in _crates:
 		PushCrate.draw_crate(self, r, int(r.position.x * 3.0 + r.position.y))
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	var h := 0
+	for k in stacks:
+		h = maxi(h, k)
+	return Rect2(0, -h * crate_size, stacks.size() * crate_size, h * crate_size)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "crate_size", "pos": Vector2(stacks.size() * crate_size, 0)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	crate_size = maxf(12.0, p.x / maxf(1.0, stacks.size()))

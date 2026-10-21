@@ -86,3 +86,16 @@ func _draw() -> void:
 	for j in range(rows - 2, 0, -1):
 		outline.append(_pts[j * columns])
 	draw_colored_polygon(outline, Color.BLACK)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-6, -pole_height, 62, pole_height)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "pole_height", "pos": Vector2(0, -pole_height)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	pole_height = maxf(20.0, -p.y)

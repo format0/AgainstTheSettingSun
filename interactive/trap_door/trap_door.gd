@@ -109,3 +109,16 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, 4.0, c)
 	if Engine.is_editor_hint():
 		DrawKit.editor_caption(self, Vector2(s * 4.0 - (40.0 if s < 0 else 0.0), -6), DrawKit.EDITOR_INTERACTIVE, "trap door")
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(minf(0.0, _side() * width), -6, width, 16)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "width", "pos": Vector2(_side() * width, 4)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	width = maxf(12.0, absf(p.x))

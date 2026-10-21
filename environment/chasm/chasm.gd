@@ -75,3 +75,16 @@ func _draw() -> void:
 			DrawKit.ellipse(self, Vector2(x, y + sin(t * 0.3 + k) * 6.0), Vector2(120.0 + k * 20.0, 10.0 + k * 3.0), 0.0, col, 20)
 	if Engine.is_editor_hint():
 		DrawKit.editor_box(self, Rect2(Vector2.ZERO, size), Color(0.6, 0.6, 0.7, 0.6), "chasm (scenery)")
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(Vector2.ZERO, size)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": size}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	size = p.max(Vector2(40, 40))

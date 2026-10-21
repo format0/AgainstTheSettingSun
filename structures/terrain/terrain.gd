@@ -144,3 +144,21 @@ func _draw() -> void:
 		draw_colored_polygon(d, c)
 	for r in _roots:
 		draw_polyline(r, c, 2.0)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	if _poly.size() > 2:
+		return _editor_bbox(_poly)
+	return _editor_bbox(points).grow_side(SIDE_BOTTOM, bottom)
+
+
+func _editor_hit(p: Vector2) -> DrawKit.EditorHit:
+	return DrawKit.EditorHit.SHAPE if _poly.size() > 2 and Geometry2D.is_point_in_polygon(p, _poly) else DrawKit.EditorHit.MISS
+
+
+static func _editor_bbox(pts: PackedVector2Array) -> Rect2:
+	var r := Rect2(pts[0], Vector2.ZERO) if pts.size() > 0 else Rect2()
+	for q in pts:
+		r = r.expand(q)
+	return r

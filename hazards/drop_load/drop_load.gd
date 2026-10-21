@@ -171,3 +171,22 @@ func _draw() -> void:
 	if Engine.is_editor_hint():
 		DrawKit.editor_box(self, Rect2(-size.x * 0.5, floor_depth - size.y, size.x, size.y), DrawKit.EDITOR_HAZARD, "lands here")
 		DrawKit.editor_caption(self, Vector2(10, -8), DrawKit.EDITOR_HAZARD, "drops: " + ["switch", "trap"][trigger])
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-size.x * 0.5, 0, size.x, chain_length + size.y)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "chain_length", "pos": Vector2(0, chain_length)}, {"id": "size", "pos": Vector2(size.x * 0.5, chain_length + size.y)}, {"id": "floor_depth", "pos": Vector2(0, floor_depth)}]
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	match id:
+		"chain_length":
+			chain_length = maxf(10.0, p.y)
+		"size":
+			size = Vector2(maxf(16.0, absf(p.x) * 2.0), maxf(10.0, p.y - chain_length))
+		"floor_depth":
+			floor_depth = maxf(chain_length + size.y, p.y)

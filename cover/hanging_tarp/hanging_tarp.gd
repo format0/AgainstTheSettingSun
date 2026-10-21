@@ -135,3 +135,17 @@ func _draw() -> void:
 	for i in columns:
 		draw_circle(Vector2(i * width / (columns - 1), -2.0), 2.0, c)
 	_draw_cover_outline()
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(0, 0, width, drop)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": Vector2(width, drop), "props": ["width", "drop"]}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	width = maxf(20.0, p.x)
+	drop = maxf(20.0, p.y)

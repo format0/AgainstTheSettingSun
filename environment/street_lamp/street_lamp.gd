@@ -13,19 +13,26 @@ enum Behaviour { STEADY, FLICKERING, FAILING }
 @export var bulbs := PackedVector2Array([Vector2(-17, 0), Vector2(17, 0)]):
 	set(v):
 		bulbs = v
-		queue_redraw()
+		_relayout()
 ## Distance from the bulbs down to the ground.
 @export var post_height := 132.0:
 	set(v):
 		post_height = v
-		queue_redraw()
+		_relayout()
 @export var draw_post := true:
 	set(v):
 		draw_post = v
 		queue_redraw()
-@export var light_color := Color(1.0, 0.76, 0.45)
+@export var light_color := Color(1.0, 0.76, 0.45):
+	set(v):
+		light_color = v
+		_relayout()
 ## The lamp switches on with a stutter when the sun has set this far (0 = always on).
-@export_range(0.0, 1.0) var turns_on_at := 0.0
+@export_range(0.0, 1.0) var turns_on_at := 0.0:
+	set(v):
+		turns_on_at = v
+		if _light and Engine.is_editor_hint():
+			_editor_preview()
 @export_range(0, 20) var moth_count := 7
 @export var hum := true
 
@@ -46,8 +53,6 @@ var _power := 0.0
 func _ready() -> void:
 	add_to_group("lamps")
 	add_to_group("light_sources")
-	if Engine.is_editor_hint():
-		return
 	_light = ColorRect.new()
 	_light.z_as_relative = false
 	_light.z_index = Layers.LAMP_LIGHT
@@ -56,8 +61,11 @@ func _ready() -> void:
 	mat.shader = preload("res://environment/street_lamp/lamp_light.gdshader")
 	_light.material = mat
 	add_child(_light)
-	Game.no_occlude(_light)
 	_layout_light()
+	if Engine.is_editor_hint():
+		_editor_preview()
+		return
+	Game.no_occlude(_light)
 	_moths = MothSwarm.new()
 	_moths.lamp = self
 	_moths.count = moth_count
@@ -69,6 +77,14 @@ func _ready() -> void:
 		_buzz.volume_db = -14.0
 		add_child(_buzz)
 		_buzz.play()
+
+
+func _relayout() -> void:
+	queue_redraw()
+	if _light:
+		_layout_light()
+		if Engine.is_editor_hint():
+			_editor_preview()
 
 
 func _layout_light() -> void:
@@ -95,6 +111,13 @@ func _process(delta: float) -> void:
 		_power = minf(1.0, _power + delta * 0.6)
 	var warm := _power if _power >= 1.0 else (1.0 if randf() < _power * 0.6 else 0.0)
 	intensity *= warm
+	_update_light()
+	if _buzz:
+		_buzz.volume_db = linear_to_db(maxf(intensity, 0.001)) - 14.0
+	queue_redraw()
+
+
+func _update_light() -> void:
 	var mat := _light.material as ShaderMaterial
 	var data: Array[Vector4] = []
 	for i in 4:
@@ -106,9 +129,6 @@ func _process(delta: float) -> void:
 	mat.set_shader_parameter("bulbs", data)
 	mat.set_shader_parameter("world_x", global_position.x)
 	mat.set_shader_parameter("fog", (0.5 + 0.5 * clampf(Weather.storm, 0.0, 1.0)) * VFX.v("lamp_glow"))
-	if _buzz:
-		_buzz.volume_db = linear_to_db(maxf(intensity, 0.001)) - 14.0
-	queue_redraw()
 
 
 func _update_behaviour(delta: float) -> void:
@@ -178,3 +198,34 @@ func _draw() -> void:
 			draw_colored_polygon(PackedVector2Array([b + Vector2(-6, -3), b + Vector2(6, -3), b + Vector2(3, -10), b + Vector2(-3, -10)]), Color.BLACK)
 	for b in bulbs:
 		draw_circle(b, 4.0, glow)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	var r := Rect2(-12, -24, 24, post_height + 24.0)
+	for b in bulbs:
+		r = r.expand(b + Vector2(-14, -10)).expand(b + Vector2(14, 14))
+	return r
+
+
+## The foot of the post, and each bulb.
+func _editor_handles() -> Array[Dictionary]:
+	var h: Array[Dictionary] = [{"id": "post_height", "pos": Vector2(0, post_height)}]
+	for i in bulbs.size():
+		h.append({"id": i, "pos": bulbs[i], "props": ["bulbs"]})
+	return h
+
+
+func _editor_drag(id: Variant, p: Vector2) -> void:
+	if id is String:
+		post_height = maxf(0.0, p.y)
+		return
+	var b := bulbs.duplicate()
+	b[id] = p
+	bulbs = b
+
+
+## The lamp as it looks at the previewed time of day, standing still.
+func _editor_preview() -> void:
+	intensity = 1.0 if Daylight.progress >= turns_on_at else 0.0
+	_update_light()

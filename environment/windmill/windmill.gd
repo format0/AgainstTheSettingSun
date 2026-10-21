@@ -50,3 +50,16 @@ func _draw() -> void:
 	draw_circle(hub, 5.0, c)
 	draw_arc(hub, 22.0, 0, TAU, 40, c, 1.6)
 	draw_arc(hub, wheel_radius, 0, TAU, 48, c, 1.6)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-maxf(45.0, wheel_radius + 10.0), -tower_height - wheel_radius * 0.5, maxf(90.0, wheel_radius * 2.0 + 20.0), tower_height + wheel_radius * 0.5)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "tower_height", "pos": Vector2(0, -tower_height)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	tower_height = maxf(40.0, -p.y)

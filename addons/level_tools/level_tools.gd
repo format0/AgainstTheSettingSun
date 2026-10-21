@@ -5,8 +5,13 @@ extends EditorPlugin
 ##    a point to remove it (all undoable).
 ##  - "Sky" in the 2D toolbar: the level's sky and distant scenery behind it while editing,
 ##    as the game shows them, so the black silhouettes can be seen.
+##  - "Fog": the level's fog, still, over the view.
+##  - "Time": see the level at any point of the sunset (lamps switch on, the light fades).
+##    Only a preview; where the level starts is its start_progress.
 ##  - "Collision" in the 2D toolbar: show the collision shapes the elements build for
 ##    themselves (hidden by default, they cover the artwork).
+##  - The selected element shows diamond handles for its shape (a corner for its size, pole
+##    tops, chain ends, patrol ends...); drag them (Shift snaps to 8 px).
 ##  - Click any level element to select it (Shift adds to the selection) and drag it to move
 ##    it (Shift snaps to 8 px); the selection is outlined. The editor cannot pick these
 ##    custom-drawn nodes by itself. Rotate and scale them with the usual tools or the Inspector.
@@ -15,12 +20,17 @@ extends EditorPlugin
 
 const PointPathEditor := preload("res://addons/level_tools/point_path_editor.gd")
 const ElementBounds := preload("res://addons/level_tools/element_bounds.gd")
+const ElementHandles := preload("res://addons/level_tools/element_handles.gd")
 const EditorBackdrop := preload("res://addons/level_tools/editor_backdrop.gd")
 const META_SECTION := "level_tools"
 
 var _points: PointPathEditor
+var _handles_ed: ElementHandles
 var _bar: HBoxContainer
 var _sky_toggle: CheckBox
+var _fog_toggle: CheckBox
+var _time: HSlider
+var _time_label: Label
 var _collision_toggle: CheckBox
 var _moving: Array[Node2D] = []
 var _move_from: Array[Vector2] = []
@@ -31,9 +41,24 @@ var _moved := false
 func _enter_tree() -> void:
 	_points = PointPathEditor.new()
 	_points.plugin = self
+	_handles_ed = ElementHandles.new()
+	_handles_ed.plugin = self
 	_bar = HBoxContainer.new()
 	_bar.add_child(VSeparator.new())
 	_sky_toggle = _toggle("Sky", "Show the level's sky and distant scenery behind it while editing.", "sky", true)
+	_fog_toggle = _toggle("Fog", "Show the level's fog (still) while editing.", "fog", true)
+	_time_label = Label.new()
+	_time_label.text = "Time"
+	_bar.add_child(_time_label)
+	_time = HSlider.new()
+	_time.min_value = 0.0
+	_time.max_value = 1.0
+	_time.step = 0.01
+	_time.custom_minimum_size = Vector2(90, 0)
+	_time.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_time.tooltip_text = "Preview the level at this point of the sunset (0 = the sun still up, 1 = night).\nOnly a preview: the level starts at its start_progress."
+	_time.value_changed.connect(_on_time_changed)
+	_bar.add_child(_time)
 	_collision_toggle = _toggle("Collision", "Show the collision shapes that elements build for themselves.", "collision", false)
 	add_control_to_container(CONTAINER_CANVAS_EDITOR_MENU, _bar)
 	scene_changed.connect(_on_scene_changed)
@@ -51,6 +76,7 @@ func _exit_tree() -> void:
 	remove_control_from_container(CONTAINER_CANVAS_EDITOR_MENU, _bar)
 	_bar.queue_free()
 	var root := EditorInterface.get_edited_scene_root()
+	FogLayer.editor_shown = true
 	if root:
 		_remove_backdrop(root)
 		_set_collision_visible(root, true)
@@ -63,7 +89,7 @@ func _toggle(text: String, tip: String, key: String, default: bool) -> CheckBox:
 	c.button_pressed = EditorInterface.get_editor_settings().get_project_metadata(META_SECTION, key, default)
 	c.toggled.connect(func(on: bool):
 		EditorInterface.get_editor_settings().set_project_metadata(META_SECTION, key, on)
-		_on_scene_changed(EditorInterface.get_edited_scene_root()))
+		_refresh(EditorInterface.get_edited_scene_root()))
 	_bar.add_child(c)
 	return c
 
@@ -98,6 +124,7 @@ func _forward_canvas_force_draw_over_viewport(overlay: Control) -> void:
 			var pts := PackedVector2Array([xf * r.position, xf * Vector2(r.end.x, r.position.y), xf * r.end, xf * Vector2(r.position.x, r.end.y), xf * r.position])
 			overlay.draw_polyline(pts, Color(0, 0, 0, 0.5), 3.0)
 			overlay.draw_polyline(pts, Color(1.0, 0.8, 0.4, 0.85), 1.0)
+	_handles_ed.draw(overlay)
 
 
 ## The 2D view only forwards its input to a plugin that handles the selected node, so with
@@ -111,7 +138,7 @@ func _input(event: InputEvent) -> void:
 	if view == null or not view.is_visible_in_tree():
 		return
 	var local: Vector2 = view.get_global_transform_with_canvas().affine_inverse() * (event as InputEventMouse).position
-	var busy := _points.is_dragging() or not _moving.is_empty()
+	var busy := _points.is_dragging() or _handles_ed.is_dragging() or not _moving.is_empty()
 	if not busy:
 		if not Rect2(Vector2.ZERO, view.size).has_point(local):
 			return
@@ -123,7 +150,7 @@ func _input(event: InputEvent) -> void:
 			return
 	var ev := event.duplicate() as InputEventMouse
 	ev.position = local
-	if _points.input(ev) or _pick_and_move(ev):
+	if _points.input(ev) or _handles_ed.input(ev) or _pick_and_move(ev):
 		view.get_viewport().set_input_as_handled()
 
 
@@ -202,14 +229,36 @@ func _pick(root: Node, world: Vector2) -> Node2D:
 
 # ------------------------------------------------------------------ the open level
 
+## Another scene was opened: show it as the toolbar says, at its own time of day.
 func _on_scene_changed(root: Node) -> void:
+	_refresh(root)
+	if root and _is_level(root):
+		var start: Variant = root.get("start_progress")
+		_time.set_value_no_signal(float(start) if start != null else 0.0)
+		_time_label.text = "Time %.2f" % _time.value
+		_backdrop(root).preview_progress = -1.0
+	_time.editable = root != null and _is_level(root)
+
+
+func _refresh(root: Node) -> void:
 	if root == null:
 		return
 	_set_collision_visible(root, _collision_toggle.button_pressed)
-	if _is_level(root) and _sky_toggle.button_pressed:
-		_ensure_backdrop(root)
+	FogLayer.editor_shown = _fog_toggle.button_pressed
+	if _is_level(root):
+		# kept without the sky too: it holds the previewed time of day
+		_ensure_backdrop(root).visible = _sky_toggle.button_pressed
 	else:
 		_remove_backdrop(root)
+
+
+func _on_time_changed(v: float) -> void:
+	_time_label.text = "Time %.2f" % v
+	var root := EditorInterface.get_edited_scene_root()
+	if root:
+		var b := _backdrop(root)
+		if b:
+			b.preview_progress = v
 
 
 func _is_level(root: Node) -> bool:
@@ -221,15 +270,22 @@ func _is_level(root: Node) -> bool:
 	return false
 
 
-func _ensure_backdrop(root: Node) -> void:
+func _backdrop(root: Node) -> EditorBackdrop:
 	for c in root.get_children(true):
 		if c.get_script() == EditorBackdrop:
-			return
+			return c
+	return null
+
+
+func _ensure_backdrop(root: Node) -> EditorBackdrop:
+	if _backdrop(root):
+		return _backdrop(root)
 	var b := EditorBackdrop.new()
 	b.name = "EditorBackdrop"
 	b.level = root
 	# an internal child without an owner: drawn in the editor, never saved
 	root.add_child(b, false, Node.INTERNAL_MODE_FRONT)
+	return b
 
 
 func _remove_backdrop(root: Node) -> void:

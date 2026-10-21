@@ -47,3 +47,21 @@ func _on_player(_player: Player) -> void:
 
 func _on_enemy(_enemy: Enemy) -> void:
 	pass
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(Vector2.ZERO, size)
+
+
+## An invisible zone is picked only where nothing else is.
+func _editor_hit(p: Vector2) -> DrawKit.EditorHit:
+	return DrawKit.EditorHit.AREA if _editor_rect().has_point(p) else DrawKit.EditorHit.MISS
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "size", "pos": size}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	size = p.max(Vector2(8, 8))

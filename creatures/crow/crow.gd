@@ -128,3 +128,8 @@ func _ellipse(center: Vector2, radii: Vector2, angle: float) -> void:
 		var a := i * TAU / 14.0
 		pts.append(center + Vector2(cos(a) * radii.x, sin(a) * radii.y).rotated(angle))
 	draw_colored_polygon(pts, Color.BLACK)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(-13, -17, 26, 19)

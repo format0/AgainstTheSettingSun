@@ -188,3 +188,16 @@ func _process(_delta: float) -> void:
 	_mat.set_shader_parameter("wind_response", wind_response)
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	_mat.set_shader_parameter("player_x", player.global_position.x if (player and player_pushes) else -99999.0)
+
+# ------------------------------------------------------------------ editor (Level Tools)
+
+func _editor_rect() -> Rect2:
+	return Rect2(0, -30, width, 32)
+
+
+func _editor_handles() -> Array[Dictionary]:
+	return [{"id": "width", "pos": Vector2(width, 0)}]
+
+
+func _editor_drag(_id: Variant, p: Vector2) -> void:
+	width = maxf(20.0, p.x)
