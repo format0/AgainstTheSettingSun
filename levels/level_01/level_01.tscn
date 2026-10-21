@@ -1,0 +1,412 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://levels/level.gd" id="level"]
+[ext_resource type="Script" path="res://effects/weather/weather_controller.gd" id="weather"]
+[ext_resource type="Script" path="res://effects/sky/sky.gd" id="sky"]
+[ext_resource type="Script" path="res://effects/lightning/lightning.gd" id="lightning"]
+[ext_resource type="Script" path="res://effects/distant_scenery/distant_scenery.gd" id="distant"]
+[ext_resource type="Script" path="res://effects/rain/rain_layer.gd" id="rain"]
+[ext_resource type="Script" path="res://effects/fog/fog_layer.gd" id="fog"]
+[ext_resource type="Script" path="res://effects/rain/rain_splashes.gd" id="splashes"]
+[ext_resource type="Script" path="res://effects/post/wet_ground.gd" id="wet"]
+[ext_resource type="Script" path="res://effects/post/light_shafts.gd" id="shafts"]
+[ext_resource type="Script" path="res://effects/post/camera_lens.gd" id="lens"]
+[ext_resource type="Script" path="res://effects/ambience/ambience.gd" id="ambience"]
+[ext_resource type="Texture2D" path="res://assets/level_01/backdrop.png" id="backdrop_tex"]
+[ext_resource type="Texture2D" path="res://assets/level_01/hanging_beams.png" id="beams_tex"]
+[ext_resource type="Script" path="res://elements/solid_block/solid_block.gd" id="block"]
+[ext_resource type="Script" path="res://elements/swinging_beam/swinging_beam.gd" id="swing"]
+[ext_resource type="Script" path="res://elements/street_lamp/street_lamp.gd" id="lamp"]
+[ext_resource type="Script" path="res://elements/cloth_flag/cloth_flag.gd" id="flag"]
+[ext_resource type="Script" path="res://elements/power_line/power_line.gd" id="power"]
+[ext_resource type="Script" path="res://elements/wind_tree/wind_tree.gd" id="tree"]
+[ext_resource type="Script" path="res://elements/windmill/windmill.gd" id="windmill"]
+[ext_resource type="Script" path="res://elements/grass_field/grass_field.gd" id="grass"]
+[ext_resource type="Script" path="res://elements/puddle/puddle.gd" id="puddle"]
+[ext_resource type="Script" path="res://creatures/frog/frog.gd" id="frog"]
+[ext_resource type="Script" path="res://creatures/crow/crow.gd" id="crow"]
+[ext_resource type="Script" path="res://creatures/plastic_bag/plastic_bag.gd" id="bag"]
+[ext_resource type="PackedScene" path="res://player/player.tscn" id="player"]
+[ext_resource type="Script" path="res://core/game_camera.gd" id="camera"]
+[ext_resource type="Script" path="res://ui/debug_overlay.gd" id="overlay"]
+
+[node name="Level01" type="Node2D"]
+script = ExtResource("level")
+spawn_point = Vector2(300, 600)
+
+[node name="Effects" type="Node" parent="."]
+
+[node name="WeatherController" type="Node" parent="Effects"]
+script = ExtResource("weather")
+storm = 1.0
+
+[node name="Sky" type="CanvasLayer" parent="Effects"]
+script = ExtResource("sky")
+sun_screen_position = Vector2(455, 618)
+
+[node name="Lightning" type="CanvasLayer" parent="Effects"]
+script = ExtResource("lightning")
+
+[node name="DistantScenery" type="Node2D" parent="Effects"]
+script = ExtResource("distant")
+
+[node name="FarRain" type="Node2D" parent="Effects"]
+z_index = -50
+script = ExtResource("rain")
+depth_max = 0.45
+drops_per_storm = 23000
+max_drops = 46000
+
+[node name="FogBank" type="Node2D" parent="Effects"]
+z_index = -45
+script = ExtResource("fog")
+density = 0.3
+parallax = 0.6
+
+[node name="GroundFog" type="Node2D" parent="Effects"]
+z_index = 15
+script = ExtResource("fog")
+mode = 1
+density = 0.26
+parallax = 1.0
+
+[node name="NearRain" type="Node2D" parent="Effects"]
+z_index = 40
+script = ExtResource("rain")
+depth_min = 0.45
+depth_max = 1.0
+drops_per_storm = 5500
+max_drops = 11000
+
+[node name="RainSplashes" type="Node2D" parent="Effects"]
+script = ExtResource("splashes")
+
+[node name="WetGround" type="CanvasLayer" parent="Effects"]
+script = ExtResource("wet")
+
+[node name="LightShafts" type="CanvasLayer" parent="Effects"]
+script = ExtResource("shafts")
+
+[node name="CameraLens" type="CanvasLayer" parent="Effects"]
+script = ExtResource("lens")
+
+[node name="Ambience" type="Node" parent="Effects"]
+script = ExtResource("ambience")
+
+[node name="World" type="Node2D" parent="."]
+
+[node name="Backdrop" type="Sprite2D" parent="World"]
+z_index = -40
+texture = ExtResource("backdrop_tex")
+centered = false
+
+[node name="Collision" type="Node2D" parent="World"]
+
+[node name="Ground" type="StaticBody2D" parent="World/Collision"]
+position = Vector2(0, 635)
+script = ExtResource("block")
+size = Vector2(3000, 133)
+visible_fill = false
+
+[node name="CarBody" type="StaticBody2D" parent="World/Collision"]
+position = Vector2(118, 603)
+script = ExtResource("block")
+size = Vector2(117, 32)
+visible_fill = false
+
+[node name="CarRoof" type="StaticBody2D" parent="World/Collision"]
+position = Vector2(141, 580)
+script = ExtResource("block")
+size = Vector2(59, 27)
+visible_fill = false
+
+[node name="WaterTower" type="StaticBody2D" parent="World/Collision"]
+position = Vector2(356, 402)
+script = ExtResource("block")
+size = Vector2(58, 98)
+visible_fill = false
+
+[node name="Bin" type="StaticBody2D" parent="World/Collision"]
+position = Vector2(896, 601)
+script = ExtResource("block")
+size = Vector2(24, 39)
+visible_fill = false
+
+[node name="CraneBeam" type="StaticBody2D" parent="World/Collision"]
+position = Vector2(768, 528)
+script = ExtResource("block")
+size = Vector2(133, 18)
+visible_fill = false
+
+[node name="LeftBeam" type="StaticBody2D" parent="World/Collision"]
+position = Vector2(95, 322)
+script = ExtResource("block")
+size = Vector2(167, 24)
+visible_fill = false
+
+[node name="CratesBase" type="StaticBody2D" parent="World/Collision"]
+position = Vector2(496, 606)
+script = ExtResource("block")
+size = Vector2(160, 29)
+visible_fill = false
+
+[node name="Crates2" type="StaticBody2D" parent="World/Collision"]
+position = Vector2(516, 579)
+script = ExtResource("block")
+size = Vector2(128, 56)
+visible_fill = false
+
+[node name="Crates3" type="StaticBody2D" parent="World/Collision"]
+position = Vector2(528, 549)
+script = ExtResource("block")
+size = Vector2(60, 86)
+visible_fill = false
+
+[node name="CratesTop" type="StaticBody2D" parent="World/Collision"]
+position = Vector2(556, 537)
+script = ExtResource("block")
+size = Vector2(32, 98)
+visible_fill = false
+
+[node name="Crates4" type="StaticBody2D" parent="World/Collision"]
+position = Vector2(588, 561)
+script = ExtResource("block")
+size = Vector2(36, 74)
+visible_fill = false
+
+[node name="HangingBeams" type="AnimatableBody2D" parent="World"]
+z_index = -20
+position = Vector2(620, -320)
+script = ExtResource("swing")
+texture = ExtResource("beams_tex")
+beams = Array[Rect2]([Rect2(-122, 641, 168, 24), Rect2(-73, 526, 169, 25)])
+texture_offset = Vector2(-130, 320)
+
+[node name="LampLeft" type="Node2D" parent="World"]
+z_index = -20
+position = Vector2(63, 503)
+script = ExtResource("lamp")
+behaviour = 1
+draw_post = false
+post_height = 132.0
+
+[node name="LampMiddle" type="Node2D" parent="World"]
+z_index = -20
+position = Vector2(941, 503)
+script = ExtResource("lamp")
+behaviour = 0
+draw_post = false
+post_height = 132.0
+
+[node name="LampFar" type="Node2D" parent="World"]
+z_index = -20
+position = Vector2(2111, 503)
+script = ExtResource("lamp")
+behaviour = 2
+draw_post = false
+post_height = 132.0
+
+[node name="Flag" type="Node2D" parent="World"]
+z_index = -20
+position = Vector2(386, 389)
+script = ExtResource("flag")
+
+[node name="PowerLine" type="Node2D" parent="World"]
+z_index = -30
+position = Vector2(1470, 635)
+script = ExtResource("power")
+pole_height = 195.0
+
+[node name="TreeA" type="Node2D" parent="World"]
+z_index = -30
+position = Vector2(1630, 638)
+script = ExtResource("tree")
+tree_seed = 7
+size = 1.15
+
+[node name="TreeB" type="Node2D" parent="World"]
+z_index = -30
+position = Vector2(2230, 638)
+script = ExtResource("tree")
+tree_seed = 19
+size = 0.95
+
+[node name="TreeC" type="Node2D" parent="World"]
+z_index = -30
+position = Vector2(2525, 638)
+script = ExtResource("tree")
+tree_seed = 31
+size = 1.25
+
+[node name="Windmill" type="Node2D" parent="World"]
+z_index = -30
+position = Vector2(2862, 637)
+script = ExtResource("windmill")
+
+[node name="Grass" type="Node2D" parent="World"]
+z_index = 5
+position = Vector2(0, 636)
+script = ExtResource("grass")
+
+[node name="Puddles" type="Node2D" parent="World"]
+
+[node name="Puddle1" type="Node2D" parent="World/Puddles"]
+position = Vector2(300, 636)
+script = ExtResource("puddle")
+half_width = 70.0
+depth_offset = 3.0
+
+[node name="Puddle2" type="Node2D" parent="World/Puddles"]
+position = Vector2(705, 636)
+script = ExtResource("puddle")
+half_width = 50.0
+depth_offset = 6.0
+
+[node name="Puddle3" type="Node2D" parent="World/Puddles"]
+position = Vector2(1050, 636)
+script = ExtResource("puddle")
+half_width = 105.0
+depth_offset = 1.0
+
+[node name="Puddle4" type="Node2D" parent="World/Puddles"]
+position = Vector2(1390, 636)
+script = ExtResource("puddle")
+half_width = 80.0
+depth_offset = 7.0
+
+[node name="Puddle5" type="Node2D" parent="World/Puddles"]
+position = Vector2(1705, 636)
+script = ExtResource("puddle")
+half_width = 150.0
+depth_offset = 4.0
+
+[node name="Puddle6" type="Node2D" parent="World/Puddles"]
+position = Vector2(2180, 636)
+script = ExtResource("puddle")
+half_width = 95.0
+depth_offset = 2.0
+
+[node name="Puddle7" type="Node2D" parent="World/Puddles"]
+position = Vector2(2480, 636)
+script = ExtResource("puddle")
+half_width = 120.0
+depth_offset = 6.0
+
+[node name="Puddle8" type="Node2D" parent="World/Puddles"]
+position = Vector2(2845, 636)
+script = ExtResource("puddle")
+half_width = 90.0
+depth_offset = 3.0
+
+[node name="Creatures" type="Node2D" parent="."]
+
+[node name="Frog1" type="Node2D" parent="Creatures"]
+position = Vector2(260, 637)
+script = ExtResource("frog")
+
+[node name="Frog2" type="Node2D" parent="Creatures"]
+position = Vector2(700, 637)
+script = ExtResource("frog")
+
+[node name="Frog3" type="Node2D" parent="Creatures"]
+position = Vector2(1180, 637)
+script = ExtResource("frog")
+
+[node name="Frog4" type="Node2D" parent="Creatures"]
+position = Vector2(1560, 637)
+script = ExtResource("frog")
+
+[node name="Frog5" type="Node2D" parent="Creatures"]
+position = Vector2(1990, 637)
+script = ExtResource("frog")
+
+[node name="Frog6" type="Node2D" parent="Creatures"]
+position = Vector2(2300, 637)
+script = ExtResource("frog")
+
+[node name="Frog7" type="Node2D" parent="Creatures"]
+position = Vector2(2770, 637)
+script = ExtResource("frog")
+
+[node name="Crow1" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
+position = Vector2(1570, 420)
+script = ExtResource("crow")
+power_line = NodePath("../../World/PowerLine")
+
+[node name="Crow2" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
+position = Vector2(1961, 420)
+script = ExtResource("crow")
+power_line = NodePath("../../World/PowerLine")
+
+[node name="Crow3" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
+position = Vector2(2229, 420)
+script = ExtResource("crow")
+power_line = NodePath("../../World/PowerLine")
+
+[node name="Crow4" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
+position = Vector2(2433, 420)
+script = ExtResource("crow")
+power_line = NodePath("../../World/PowerLine")
+
+[node name="Crow5" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
+position = Vector2(1604, 420)
+script = ExtResource("crow")
+power_line = NodePath("../../World/PowerLine")
+
+[node name="Crow6" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
+position = Vector2(1964, 420)
+script = ExtResource("crow")
+power_line = NodePath("../../World/PowerLine")
+
+[node name="Crow7" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
+position = Vector2(2211, 420)
+script = ExtResource("crow")
+power_line = NodePath("../../World/PowerLine")
+
+[node name="Crow8" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
+position = Vector2(2560, 420)
+script = ExtResource("crow")
+power_line = NodePath("../../World/PowerLine")
+
+[node name="Crow9" type="Node2D" parent="Creatures" node_paths=PackedStringArray("power_line")]
+position = Vector2(1658, 420)
+script = ExtResource("crow")
+power_line = NodePath("../../World/PowerLine")
+
+[node name="PlasticBag1" type="Node2D" parent="Creatures"]
+position = Vector2(1300, 631)
+script = ExtResource("bag")
+
+[node name="PlasticBag2" type="Node2D" parent="Creatures"]
+position = Vector2(2600, 631)
+script = ExtResource("bag")
+
+[node name="Player" parent="." instance=ExtResource("player")]
+position = Vector2(300, 600)
+
+[node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+script = ExtResource("camera")
+target = NodePath("../Player")
+
+[node name="Foreground" type="Parallax2D" parent="."]
+z_index = 30
+scroll_scale = Vector2(1.25, 1)
+
+[node name="Reeds" type="Node2D" parent="Foreground"]
+position = Vector2(0, 635)
+script = ExtResource("grass")
+width = 3500.0
+spacing_min = 2.5
+spacing_max = 9.0
+height_min = 150.0
+height_max = 290.0
+tall_chance = 0.0
+blade_width = 3.2
+clustered = true
+base_depth = 155.0
+grass_seed = 4
+wind_response = 0.3
+player_pushes = false
+
+[node name="DebugOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("overlay")
