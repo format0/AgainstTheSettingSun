@@ -155,7 +155,9 @@ void fragment() {
 		float mono = film_grain(gp, frame);
 		vec3 rgb = vec3(film_grain(gp + 31.7, frame), film_grain(gp + 67.1, frame), film_grain(gp + 13.9, frame));
 		float l = clamp(dot(col, vec3(0.299, 0.587, 0.114)), 0.0, 1.0);
+		// on film even the blacks are grain: a faint lifted texture rather than flat black
 		col += mix(vec3(mono), rgb, grain_color) * grain * (0.35 + 2.6 * l * (1.0 - l));
+		col += (mono * 0.5 + 0.5) * grain * 0.45 * (1.0 - smoothstep(0.0, 0.12, l));
 	}
 	col *= 1.0 + (hash12(vec2(floor(weather_time * 24.0), 3.3)) - 0.5) * 0.04 * film_flicker;
 	COLOR = vec4(max(col, 0.0), 1.0);

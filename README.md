@@ -192,3 +192,8 @@ by side on a flat strip, to look at them against the sunset (run it with F6, F1 
    - glows, fog and other see-through effects call `Game.no_occlude(node)` → they don't block the sun's shafts or the rain;
    - join `rain_surfaces` with `get_rain_edges()` → rain splashes on it; join `lightning_listeners` with `on_lightning()`;
    - call `player.make_noise(pos, radius)` → hunters come to look.
+4. Keep `_draw()` for shapes that really change shape. Something made of many pieces that only
+   move (branches, boughs, leaves) should record each piece once with `CanvasParts` and set
+   only their transforms each frame, and skip that while off screen (`CanvasParts.on_screen`);
+   per-piece motion that is too fine for that (fluttering leaves) can go into a small vertex
+   shader. See `WindTree`, `OldOak` and `PineTree`.
