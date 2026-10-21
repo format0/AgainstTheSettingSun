@@ -25,7 +25,7 @@ inside the game by itself.
 **F1** opens a panel (use the mouse; the arrow keys still run) with a slider or switch for
 everything that shapes the look: bloom, threshold and wide glow, light shafts, lamp and sun
 glow, edge softening, diffusion, haze and fog, exposure, warmth, saturation, contrast,
-vignette, grain, colour fringing, lens rain, the amount of rain, rain stopping under roofs,
+vignette, colour fringing, lens rain, film grain (amount, size, colour), halation and exposure flicker, the amount of rain, rain stopping under roofs,
 gust sheets, drips, splashes, leaves, bats, starlings, fireflies, dust in the light, steam,
 chimney smoke and sparks, and the sundown: how red the light turns as the sun goes, the
 cold blue hour after it, the afterglow on the clouds, the sun flattening on the horizon,

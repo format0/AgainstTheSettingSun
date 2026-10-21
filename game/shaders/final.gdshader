@@ -1,7 +1,7 @@
 shader_type canvas_item;
 // The last step: the level's picture plus bloom and light shafts, softened edges and a
 // touch of diffusion, raindrops on the lens, colour fringing, grading, vignette, the night
-// closing in, and film grain.
+// closing in, and film grain (with halation and a little flicker if wanted).
 
 uniform sampler2D scene : filter_linear;
 uniform sampler2D bloom_near : filter_linear;
@@ -23,7 +23,11 @@ uniform float warmth = 0.2;
 uniform float saturation = 1.1;
 uniform float contrast = 1.0;
 uniform float vignette = 0.5;
-uniform float grain = 0.045;
+uniform float grain = 0.05;
+uniform float grain_size = 1.6;     // size of a grain in pixels of a 768-line picture
+uniform float grain_color = 0.35;   // 0 = grey grain, 1 = each colour layer grains on its own
+uniform float film_flicker = 0.0;   // the exposure breathing a little from frame to frame
+uniform float halation = 0.0;       // red glow bleeding around bright light, as on film
 uniform float darkness = 0.0;
 uniform float red_shift = 0.0;   // the light turning red as the sun goes down
 uniform float night = 0.0;       // the blue hour: shadows turning cold
@@ -32,6 +36,15 @@ uniform float motes = 1.0;
 uniform float wind = 0.5;
 
 float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
+float vnoise(vec2 p){ vec2 i = floor(p), f = fract(p); vec2 u = f*f*(3.-2.*f);
+  return mix(mix(hash12(i), hash12(i+vec2(1,0)), u.x), mix(hash12(i+vec2(0,1)), hash12(i+vec2(1,1)), u.x), u.y); }
+
+// Film grain: clumps of silver of uneven size, a fresh pattern on every film frame (24 a second).
+float film_grain(vec2 p, float frame) {
+	vec2 o = vec2(hash12(vec2(frame, 1.7)), hash12(vec2(frame, 9.2))) * 400.0;
+	float g = vnoise(p + o) * 0.65 + vnoise(p * 2.13 - o) * 0.35;
+	return (g - 0.5) * 2.4;
+}
 
 vec3 lens_drops(vec2 uv) {
 	vec2 p = uv * vec2(aspect, 1.0);
@@ -100,6 +113,9 @@ void fragment() {
 	col += texture(bloom_far, uv).rgb * diffusion * 0.6 * bloom;
 
 	col += (texture(bloom_near, uv).rgb * 0.4 + texture(bloom_far, uv).rgb * 0.55 * bloom_wide) * bloom;
+	// halation: light scattered back through the film base glows red around bright things
+	vec3 hal = texture(bloom_near, uv).rgb * 0.6 + texture(bloom_far, uv).rgb * 0.4;
+	col += vec3(1.0, 0.22, 0.08) * dot(hal, vec3(0.33)) * halation * 0.9;
 	vec3 shaft = texture(rays, uv).rgb;
 	col += shaft * vec3(1.0, 0.58, 0.28) * 0.38 * rays_amount;
 	if (motes > 0.0) {
@@ -132,6 +148,15 @@ void fragment() {
 	col *= 1.0 - vignette * pow(length(v * vec2(1.0, 0.82)) * 1.25, 2.4);
 	float closing = 1.0 - smoothstep(0.25 - darkness * 0.2, 0.75 - darkness * 0.45, length(v * vec2(aspect, 1.0) * 0.6));
 	col *= mix(1.0, closing, darkness);
-	col += (hash12(FRAGCOORD.xy + fract(weather_time * 7.3) * 731.0) - 0.5) * grain * sqrt(max(lum, 0.0));
+	if (grain > 0.0) {
+		// strongest in the midtones, still there in the shadows, as on film
+		float frame = floor(weather_time * 24.0);
+		vec2 gp = uv0 * vec2(aspect * 768.0, 768.0) / grain_size;
+		float mono = film_grain(gp, frame);
+		vec3 rgb = vec3(film_grain(gp + 31.7, frame), film_grain(gp + 67.1, frame), film_grain(gp + 13.9, frame));
+		float l = clamp(dot(col, vec3(0.299, 0.587, 0.114)), 0.0, 1.0);
+		col += mix(vec3(mono), rgb, grain_color) * grain * (0.35 + 2.6 * l * (1.0 - l));
+	}
+	col *= 1.0 + (hash12(vec2(floor(weather_time * 24.0), 3.3)) - 0.5) * 0.04 * film_flicker;
 	COLOR = vec4(max(col, 0.0), 1.0);
 }

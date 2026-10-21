@@ -215,6 +215,10 @@ func _process(_delta: float) -> void:
 	m.set_shader_parameter("contrast", VFX.v("contrast"))
 	m.set_shader_parameter("vignette", VFX.v("vignette"))
 	m.set_shader_parameter("grain", VFX.v("grain"))
+	m.set_shader_parameter("grain_size", VFX.v("grain_size"))
+	m.set_shader_parameter("grain_color", VFX.v("grain_color"))
+	m.set_shader_parameter("halation", VFX.v("halation"))
+	m.set_shader_parameter("film_flicker", VFX.v("film_flicker"))
 	m.set_shader_parameter("darkness", Daylight.urgency())
 	var pr := Daylight.progress
 	m.set_shader_parameter("red_shift", VFX.v("sunset_red") * smoothstep(0.08, 0.6, pr) * (1.0 - 0.5 * smoothstep(0.8, 1.0, pr)))

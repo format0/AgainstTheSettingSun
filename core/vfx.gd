@@ -28,9 +28,14 @@ const SETTINGS := {
 	"saturation": [1.12, 0.5, 1.8, "Saturation", "Grade"],
 	"contrast": [1.0, 0.7, 1.4, "Contrast", "Grade"],
 	"vignette": [0.5, 0.0, 1.0, "Vignette", "Grade"],
-	"grain": [0.045, 0.0, 0.15, "Film grain", "Grade"],
 	"chroma": [1.0, 0.0, 3.0, "Colour fringing", "Grade"],
 	"lens_rain": [1.0, 0.0, 2.0, "Raindrops on the lens", "Grade"],
+	# film
+	"grain": [0.05, 0.0, 0.25, "Film grain", "Film"],
+	"grain_size": [1.6, 0.8, 4.0, "Grain size", "Film"],
+	"grain_color": [0.35, 0.0, 1.0, "Colour in the grain", "Film"],
+	"halation": [0.0, 0.0, 1.5, "Halation (red glow round lights)", "Film"],
+	"film_flicker": [0.0, 0.0, 1.0, "Exposure flicker", "Film"],
 	# sundown
 	"sunset_red": [1.0, 0.0, 2.0, "Reddening as the sun sets", "Sundown"],
 	"blue_hour": [1.0, 0.0, 2.0, "Blue hour (cold shadows at night)", "Sundown"],
